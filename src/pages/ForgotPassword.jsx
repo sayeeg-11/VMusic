@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Mail, ArrowLeft, CheckCircle, AlertCircle } from 'lucide-react';
+import { Mail, ArrowLeft, CheckCircle, AlertCircle, Info } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from '../config/firebase';
@@ -18,23 +18,42 @@ const ForgotPassword = () => {
     setLoading(true);
 
     try {
-      await sendPasswordResetEmail(auth, email, {
+      // Configure action code settings for password reset
+      const actionCodeSettings = {
         url: window.location.origin + '/',
-        handleCodeInApp: false
-      });
-      setMessage('Password reset email sent! Please check your inbox.');
+        handleCodeInApp: false,
+      };
+
+      console.log('Sending password reset email to:', email);
+      console.log('Action code settings:', actionCodeSettings);
+      console.log('Auth domain:', auth.config.authDomain);
+      
+      await sendPasswordResetEmail(auth, email, actionCodeSettings);
+      
+      console.log('Password reset email sent successfully');
+      console.log('✅ Email should arrive within 5-10 minutes');
+      console.log('⚠️ Check your spam/junk folder!');
+      
+      setMessage(`Password reset email sent to ${email}! Please check your inbox and spam folder. The link expires in 1 hour.`);
       setEmail('');
     } catch (err) {
-      console.error('Password reset error:', err);
+      console.error('❌ Password reset error:', err);
+      console.error('Error code:', err.code);
+      console.error('Error message:', err.message);
+      console.error('Full error:', JSON.stringify(err, null, 2));
       
       let errorMessage = 'Failed to send reset email. Please try again.';
       
       if (err.code === 'auth/user-not-found') {
-        errorMessage = 'No account found with this email address.';
+        errorMessage = 'No account found with this email address. Please check the email or sign up.';
       } else if (err.code === 'auth/invalid-email') {
-        errorMessage = 'Invalid email address.';
+        errorMessage = 'Invalid email address format.';
       } else if (err.code === 'auth/too-many-requests') {
-        errorMessage = 'Too many requests. Please try again later.';
+        errorMessage = 'Too many requests. Please wait a few minutes and try again.';
+      } else if (err.code === 'auth/network-request-failed') {
+        errorMessage = 'Network error. Please check your internet connection.';
+      } else if (err.code === 'auth/unauthorized-domain') {
+        errorMessage = 'This domain is not authorized. Please add it to Firebase Console.';
       } else if (err.message) {
         errorMessage = err.message;
       }
@@ -165,11 +184,29 @@ const ForgotPassword = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
-          className="mt-6 bg-white/5 border border-white/10 rounded-lg p-4 backdrop-blur-sm"
+          className="mt-6 bg-white/5 border border-white/10 rounded-lg p-4 backdrop-blur-sm space-y-3"
         >
-          <p className="text-gray-400 text-xs text-center">
-            💡 The reset link will expire in 1 hour. Make sure to check your spam folder if you don't see the email.
-          </p>
+          <div className="flex items-start gap-2">
+            <Info size={16} className="text-blue-400 flex-shrink-0 mt-0.5" />
+            <p className="text-gray-400 text-xs">
+              <strong className="text-gray-300">Not receiving emails?</strong> Here's what to check:
+            </p>
+          </div>
+          
+          <ul className="text-gray-400 text-xs space-y-2 ml-6">
+            <li>✉️ Check your <strong className="text-gray-300">spam/junk folder</strong></li>
+            <li>📧 Look for email from <strong className="text-gray-300">noreply@vmusic-7806a.firebaseapp.com</strong></li>
+            <li>⏰ Wait 5-10 minutes (sometimes emails are delayed)</li>
+            <li>📱 Check all Gmail tabs (Promotions, Social, Updates)</li>
+            <li>🔍 Search your inbox for "VMusic" or "Reset password"</li>
+            <li>⚙️ Make sure the email <strong className="text-gray-300">{email || 'you entered'}</strong> is correct</li>
+          </ul>
+          
+          <div className="pt-2 border-t border-white/10">
+            <p className="text-gray-500 text-xs">
+              💡 The reset link expires in <strong className="text-gray-400">1 hour</strong>
+            </p>
+          </div>
         </motion.div>
       </motion.div>
     </div>

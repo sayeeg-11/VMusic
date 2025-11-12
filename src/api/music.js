@@ -15,12 +15,19 @@ class MusicAPI {
 
   /**
    * Initialize Spotify for guest users (preview mode)
+   * With Implicit Grant Flow, Spotify requires user login
    */
   async initializeGuestSpotify() {
     try {
-      await spotifyAPI.getClientCredentialsToken();
-      this.spotifyEnabled = true;
-      return true;
+      // Check if user is already authenticated with Spotify
+      if (spotifyAPI.isTokenValid()) {
+        this.spotifyEnabled = true;
+        return true;
+      }
+      // Spotify requires user authentication with Implicit Grant Flow
+      // No guest access available - use Jamendo instead
+      this.spotifyEnabled = false;
+      return false;
     } catch (error) {
       console.error('Failed to initialize Spotify:', error);
       this.spotifyEnabled = false;
