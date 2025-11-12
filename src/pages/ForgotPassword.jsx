@@ -20,8 +20,8 @@ const ForgotPassword = () => {
     try {
       // Configure action code settings for password reset
       const actionCodeSettings = {
-        url: window.location.origin + '/',
-        handleCodeInApp: false,
+        url: window.location.origin + '/reset-password',
+        handleCodeInApp: true,
       };
 
       console.log('Sending password reset email to:', email);

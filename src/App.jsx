@@ -7,6 +7,7 @@ import About from './pages/About';
 import TrackDetails from './pages/TrackDetails';
 import SpotifyCallback from './pages/SpotifyCallback';
 import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import {
   Dashboard,
   Favorites,
@@ -39,6 +40,7 @@ function App() {
           <Route path="/terms-of-service" element={<TermsOfService />} />
           <Route path="/callback" element={<SpotifyCallback />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
           {/* Protected Routes */}
           <Route
