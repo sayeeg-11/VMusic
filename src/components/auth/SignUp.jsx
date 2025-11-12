@@ -164,7 +164,7 @@ const SignUp = ({ onClose, onSwitchToSignIn }) => {
           disabled={loading}
           className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold rounded-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <Chrome size={20} />
+          <span className="w-5 h-5 flex items-center justify-center text-lg font-bold">G</span>
           Continue with Google
         </button>
 

@@ -1,15 +1,18 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Send, Mail, User, MessageSquare, CheckCircle, AlertCircle } from 'lucide-react';
+import { Send, Mail, User, MessageSquare, CheckCircle, AlertCircle, Phone } from 'lucide-react';
+import emailjs from '@emailjs/browser';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { useAuth } from '../contexts/AuthContext';
 
 const Contact = () => {
   const { currentUser } = useAuth();
+  const formRef = useRef();
   const [formData, setFormData] = useState({
     name: currentUser?.displayName || '',
     email: currentUser?.email || '',
+    phone: '',
     subject: '',
     message: '',
   });
@@ -25,16 +28,13 @@ const Contact = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setStatus({ type: '', message: '' });
-
+    
     // Validation
     if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
       setStatus({
         type: 'error',
         message: 'Please fill in all required fields',
       });
-      setLoading(false);
       return;
     }
 
@@ -45,49 +45,80 @@ const Contact = () => {
         type: 'error',
         message: 'Please enter a valid email address',
       });
-      setLoading(false);
       return;
     }
 
+    setLoading(true);
+    setStatus({ type: '', message: '' });
+
     try {
-      // Save to Firestore
-      await addDoc(collection(db, 'feedback'), {
-        name: formData.name,
-        email: formData.email,
+      // Send email using EmailJS
+      const templateParams = {
+        from_name: formData.name,
+        from_email: formData.email,
+        phone: formData.phone || 'Not provided',
         subject: formData.subject || 'No subject',
         message: formData.message,
-        userId: currentUser?.uid || null,
-        createdAt: serverTimestamp(),
-        status: 'new',
+        name: formData.name,
+      };
+
+      const emailResult = await emailjs.send(
+        import.meta.env.VITE_EMAILJS_SERVICE_ID,
+        import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+        templateParams,
+        import.meta.env.VITE_EMAILJS_USER_ID
+      );
+
+      console.log('Email sent successfully:', emailResult);
+
+      // Also save to Firestore for backup
+      try {
+        await addDoc(collection(db, 'feedback'), {
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone || 'Not provided',
+          subject: formData.subject || 'No subject',
+          message: formData.message,
+          userId: currentUser?.uid || null,
+          createdAt: serverTimestamp(),
+          status: 'new',
+        });
+      } catch (firestoreError) {
+        console.warn('Firestore save failed, but email was sent:', firestoreError);
+      }
+
+      // Reset form first
+      setFormData({
+        name: currentUser?.displayName || '',
+        email: currentUser?.email || '',
+        phone: '',
+        subject: '',
+        message: '',
       });
 
+      // Set success status
       setStatus({
         type: 'success',
         message: 'Thank you! Your message has been sent successfully. We\'ll get back to you soon.',
       });
 
-      // Reset form
-      setFormData({
-        name: currentUser?.displayName || '',
-        email: currentUser?.email || '',
-        subject: '',
-        message: '',
-      });
+      // Stop loading
+      setLoading(false);
+
     } catch (error) {
       console.error('Error submitting feedback:', error);
+      setLoading(false);
       setStatus({
         type: 'error',
-        message: 'Failed to send message. Please try again later.',
+        message: `Failed to send message: ${error.text || error.message || 'Please try again later.'}`,
       });
-    } finally {
-      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-900 to-black pb-20">
+    <div className="min-h-screen bg-linear-to-b from-gray-900 via-gray-900 to-black pb-20">
       {/* Header */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-teal-900/40 via-cyan-900/40 to-blue-900/40 border-b border-white/10">
+      <div className="relative overflow-hidden bg-linear-to-r from-teal-900/40 via-cyan-900/40 to-blue-900/40 border-b border-white/10">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMDUpIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30"></div>
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -115,7 +146,7 @@ const Contact = () => {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10"
         >
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
             {/* Status Message */}
             {status.message && (
               <motion.div
@@ -128,9 +159,9 @@ const Contact = () => {
                 }`}
               >
                 {status.type === 'success' ? (
-                  <CheckCircle size={20} className="flex-shrink-0 mt-0.5" />
+                  <CheckCircle size={20} className="shrink-0 mt-0.5" />
                 ) : (
-                  <AlertCircle size={20} className="flex-shrink-0 mt-0.5" />
+                  <AlertCircle size={20} className="shrink-0 mt-0.5" />
                 )}
                 <p className="text-sm">{status.message}</p>
               </motion.div>
@@ -172,6 +203,25 @@ const Contact = () => {
                   required
                   className="w-full pl-11 pr-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all"
                   placeholder="john@example.com"
+                />
+              </div>
+            </div>
+
+            {/* Phone Field */}
+            <div>
+              <label htmlFor="phone" className="block text-sm font-medium text-gray-300 mb-2">
+                Phone Number (Optional)
+              </label>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                <input
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  className="w-full pl-11 pr-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all"
+                  placeholder="+1 (555) 123-4567"
                 />
               </div>
             </div>
@@ -219,7 +269,7 @@ const Contact = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-4 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-semibold rounded-lg hover:from-cyan-700 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-cyan-900/50"
+              className="w-full py-4 bg-linear-to-r from-cyan-600 to-blue-600 text-white font-semibold rounded-lg hover:from-cyan-700 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-cyan-900/50"
             >
               {loading ? (
                 <>

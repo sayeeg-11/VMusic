@@ -10,9 +10,12 @@ const Explore = () => {
   const navigate = useNavigate();
   const [tracks, setTracks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [activeCategory, setActiveCategory] = useState('trending');
   const [activeGenre, setActiveGenre] = useState('all');
   const [likedTracks, setLikedTracks] = useState(new Set());
+  const [limit, setLimit] = useState(24);
+  const [hasMore, setHasMore] = useState(true);
 
   const categories = [
     { id: 'trending', label: 'Trending', icon: TrendingUp },
@@ -33,6 +36,8 @@ const Explore = () => {
   ];
 
   useEffect(() => {
+    setLimit(24); // Reset limit when category/genre changes
+    setHasMore(true);
     fetchTracks();
   }, [activeCategory, activeGenre]);
 
@@ -44,22 +49,56 @@ const Explore = () => {
       
       if (activeCategory === 'trending') {
         if (genre?.tag) {
-          data = await jamendoAPI.getTracksByTag(genre.tag, 24);
+          data = await jamendoAPI.getTracksByTag(genre.tag, limit);
         } else {
-          data = await jamendoAPI.getTrendingTracks(24);
+          data = await jamendoAPI.getTrendingTracks(limit);
         }
       } else if (activeCategory === 'new') {
-        data = await jamendoAPI.getNewReleases(24);
+        data = await jamendoAPI.getNewReleases(limit);
       } else {
-        data = await jamendoAPI.getTrendingTracks(24);
+        data = await jamendoAPI.getTrendingTracks(limit);
       }
       
       setTracks(data.results || []);
+      setHasMore((data.results || []).length >= limit);
     } catch (error) {
       console.error('Error fetching tracks:', error);
       setTracks([]);
+      setHasMore(false);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadMoreTracks = async () => {
+    if (loadingMore || !hasMore) return;
+    
+    setLoadingMore(true);
+    const newLimit = limit + 24;
+    
+    try {
+      let data;
+      const genre = genres.find(g => g.id === activeGenre);
+      
+      if (activeCategory === 'trending') {
+        if (genre?.tag) {
+          data = await jamendoAPI.getTracksByTag(genre.tag, newLimit);
+        } else {
+          data = await jamendoAPI.getTrendingTracks(newLimit);
+        }
+      } else if (activeCategory === 'new') {
+        data = await jamendoAPI.getNewReleases(newLimit);
+      } else {
+        data = await jamendoAPI.getTrendingTracks(newLimit);
+      }
+      
+      setTracks(data.results || []);
+      setLimit(newLimit);
+      setHasMore((data.results || []).length >= newLimit);
+    } catch (error) {
+      console.error('Error loading more tracks:', error);
+    } finally {
+      setLoadingMore(false);
     }
   };
 
@@ -230,15 +269,26 @@ const Explore = () => {
         )}
 
         {/* Load More Button */}
-        {!loading && tracks.length > 0 && (
+        {!loading && tracks.length > 0 && hasMore && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.6 }}
             className="text-center mt-12"
           >
-            <button className="px-8 py-3 bg-white/5 hover:bg-white/10 text-white font-medium rounded-full border border-white/10 hover:border-white/20 transition-all">
-              Load More Tracks
+            <button 
+              onClick={loadMoreTracks}
+              disabled={loadingMore}
+              className="px-8 py-3 bg-white/5 hover:bg-white/10 text-white font-medium rounded-full border border-white/10 hover:border-white/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 mx-auto"
+            >
+              {loadingMore ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  Loading...
+                </>
+              ) : (
+                'Load More Tracks'
+              )}
             </button>
           </motion.div>
         )}

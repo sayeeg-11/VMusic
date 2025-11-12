@@ -1,8 +1,9 @@
 import { motion } from 'framer-motion';
-import { Play, ChevronRight, Music2 } from 'lucide-react';
+import { Play, ChevronRight, Music2, Sparkles } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePlayer } from '../../contexts/PlayerContext';
+import { musicAPI } from '../../api/music';
 import jamendoAPI from '../../api/jamendo';
 
 const Explore = () => {
@@ -12,12 +13,21 @@ const Explore = () => {
   const [latestTracks, setLatestTracks] = useState([]);
   const [loadingPopular, setLoadingPopular] = useState(true);
   const [loadingLatest, setLoadingLatest] = useState(true);
+  const [musicSource, setMusicSource] = useState('combined'); // 'jamendo', 'spotify', or 'combined'
+
+  // Initialize Spotify for guest users
+  useEffect(() => {
+    const initSpotify = async () => {
+      await musicAPI.initializeGuestSpotify();
+    };
+    initSpotify();
+  }, []);
 
   // Fetch popular tracks
   useEffect(() => {
     const fetchPopular = async () => {
       setLoadingPopular(true);
-      const data = await jamendoAPI.getTrendingTracks(10);
+      const data = await musicAPI.getCombinedTracks('trending', 10);
       if (data.results) {
         setPopularTracks(data.results);
       }
@@ -31,7 +41,7 @@ const Explore = () => {
   useEffect(() => {
     const fetchLatest = async () => {
       setLoadingLatest(true);
-      const data = await jamendoAPI.getNewReleases(10);
+      const data = await musicAPI.getCombinedTracks('new', 10);
       if (data.results) {
         setLatestTracks(data.results);
       }
@@ -51,10 +61,18 @@ const Explore = () => {
       {/* Album Art */}
       <div className="relative overflow-hidden aspect-square">
         <img
-          src={track.image || 'https://via.placeholder.com/200'}
+          src={track.image || track.album_image || 'https://via.placeholder.com/200'}
           alt={track.name}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
         />
+        
+        {/* Source Badge */}
+        {track.source === 'spotify' && (
+          <div className="absolute top-2 left-2 px-2 py-1 bg-green-500 rounded-full text-xs font-semibold flex items-center gap-1">
+            <Music2 size={12} />
+            Spotify
+          </div>
+        )}
         
         {/* Overlay with Play Button */}
         <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
@@ -63,9 +81,12 @@ const Explore = () => {
             whileTap={{ scale: 0.9 }}
             onClick={(e) => {
               e.stopPropagation();
-              playTrack(track, tracks);
+              if (track.audio || track.preview_url) {
+                playTrack(track, tracks);
+              }
             }}
-            className="w-12 h-12 bg-green-500 rounded-full shadow-lg hover:bg-green-600 transition-colors flex items-center justify-center"
+            className={`w-12 h-12 bg-green-500 rounded-full shadow-lg hover:bg-green-600 transition-colors flex items-center justify-center ${!track.audio && !track.preview_url ? 'opacity-50 cursor-not-allowed' : ''}`}
+            disabled={!track.audio && !track.preview_url}
           >
             <Play size={20} fill="white" className="text-white ml-0.5" />
           </motion.button>
@@ -73,7 +94,7 @@ const Explore = () => {
 
         {/* Duration Badge */}
         <div className="absolute bottom-2 right-2 px-2 py-1 bg-black/70 backdrop-blur-sm rounded-full text-xs">
-          {jamendoAPI.formatDuration(track.duration)}
+          {track.source === 'spotify' && track.preview_url ? '0:30' : jamendoAPI.formatDuration(track.duration)}
         </div>
       </div>
 
@@ -102,6 +123,20 @@ const Explore = () => {
   return (
     <section className="py-20 px-4 bg-gradient-to-b from-gray-900 to-black text-white">
       <div className="max-w-7xl mx-auto">
+        {/* Music Source Badge */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex justify-center mb-8"
+        >
+          <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500/20 to-green-500/20 backdrop-blur-lg rounded-full border border-purple-500/30">
+            <Sparkles className="text-yellow-400" size={20} />
+            <span className="text-sm font-semibold">
+              🎵 Jamendo Full Tracks + 🎧 Spotify Previews (30s)
+            </span>
+          </div>
+        </motion.div>
+
         {/* Popular Songs Section */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}

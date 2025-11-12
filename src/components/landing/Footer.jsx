@@ -1,9 +1,16 @@
-import { motion } from 'framer-motion';
-import { Play, Github, Twitter, Linkedin, Instagram, Mail } from 'lucide-react';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Play, Github, Twitter, Linkedin, Instagram, Mail, CheckCircle, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import emailjs from '@emailjs/browser';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../../config/firebase';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState({ type: '', message: '' });
 
   const footerLinks = {
     product: [
@@ -15,8 +22,8 @@ const Footer = () => {
       { name: 'Contact Us', href: '/contact' },
     ],
     legal: [
-      { name: 'Privacy Policy', href: '#privacy' },
-      { name: 'Terms of Service', href: '#terms' },
+      { name: 'Privacy Policy', href: '/privacy-policy' },
+      { name: 'Terms of Service', href: '/terms-of-service' },
     ],
     resources: [
       { name: 'API Documentation', href: 'https://developer.jamendo.com', external: true },
@@ -30,6 +37,71 @@ const Footer = () => {
     { icon: Linkedin, href: 'https://www.linkedin.com/in/baraiya-vishalbhai/', label: 'LinkedIn' },
     { icon: Instagram, href: 'https://www.instagram.com/vishalbaraiya_1014/', label: 'Instagram' },
   ];
+
+  const handleNewsletterSubmit = async (e) => {
+    e.preventDefault();
+    
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email.trim() || !emailRegex.test(email)) {
+      setStatus({
+        type: 'error',
+        message: 'Please enter a valid email address',
+      });
+      setTimeout(() => setStatus({ type: '', message: '' }), 3000);
+      return;
+    }
+
+    setLoading(true);
+    setStatus({ type: '', message: '' });
+
+    try {
+      // Send newsletter subscription email
+      const templateParams = {
+        from_name: 'Newsletter Subscriber',
+        from_email: email,
+        subject: 'Newsletter Subscription',
+        message: `New newsletter subscription from: ${email}`,
+        phone: 'Not provided',
+        name: email,
+      };
+
+      await emailjs.send(
+        import.meta.env.VITE_EMAILJS_SERVICE_ID,
+        import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+        templateParams,
+        import.meta.env.VITE_EMAILJS_USER_ID
+      );
+
+      // Save to Firestore
+      try {
+        await addDoc(collection(db, 'newsletter'), {
+          email: email,
+          subscribedAt: serverTimestamp(),
+          status: 'active',
+        });
+      } catch (firestoreError) {
+        console.warn('Firestore save failed:', firestoreError);
+      }
+
+      setStatus({
+        type: 'success',
+        message: 'Successfully subscribed!',
+      });
+      setEmail('');
+      
+      setTimeout(() => setStatus({ type: '', message: '' }), 5000);
+    } catch (error) {
+      console.error('Error subscribing to newsletter:', error);
+      setStatus({
+        type: 'error',
+        message: 'Subscription failed. Please try again.',
+      });
+      setTimeout(() => setStatus({ type: '', message: '' }), 3000);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <footer className="bg-gray-900 text-gray-300 pt-16 pb-8">
@@ -57,20 +129,54 @@ const Footer = () => {
             {/* Newsletter */}
             <div className="space-y-3">
               <p className="text-sm font-semibold text-white">Stay updated</p>
-              <div className="flex gap-2">
-                <input
-                  type="email"
-                  placeholder="Enter your email"
-                  className="flex-1 px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-green-500 text-white placeholder-gray-500"
-                />
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg font-medium hover:shadow-lg transition-all"
-                >
-                  <Mail size={20} />
-                </motion.button>
-              </div>
+              <form onSubmit={handleNewsletterSubmit} className="space-y-2">
+                <div className="flex gap-2">
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter your email"
+                    disabled={loading}
+                    className="flex-1 px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-green-500 text-white placeholder-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  />
+                  <motion.button
+                    type="submit"
+                    disabled={loading}
+                    whileHover={{ scale: loading ? 1 : 1.05 }}
+                    whileTap={{ scale: loading ? 1 : 0.95 }}
+                    className="px-4 py-2 bg-linear-to-r from-green-500 to-emerald-600 text-white rounded-lg font-medium hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loading ? (
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    ) : (
+                      <Mail size={20} />
+                    )}
+                  </motion.button>
+                </div>
+                
+                {/* Status Message */}
+                <AnimatePresence>
+                  {status.message && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className={`flex items-center gap-2 text-xs p-2 rounded ${
+                        status.type === 'success'
+                          ? 'bg-green-500/20 text-green-400'
+                          : 'bg-red-500/20 text-red-400'
+                      }`}
+                    >
+                      {status.type === 'success' ? (
+                        <CheckCircle size={14} />
+                      ) : (
+                        <AlertCircle size={14} />
+                      )}
+                      <span>{status.message}</span>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </form>
             </div>
           </div>
 

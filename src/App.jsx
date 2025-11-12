@@ -15,6 +15,8 @@ import {
   Search,
   Artist,
   Contact,
+  PrivacyPolicy,
+  TermsOfService,
 } from './pages';
 import './App.css';
 
@@ -32,6 +34,8 @@ function App() {
           <Route path="/track/:trackId" element={<TrackDetails />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/terms-of-service" element={<TermsOfService />} />
           <Route path="/callback" element={<SpotifyCallback />} />
 
           {/* Protected Routes */}
