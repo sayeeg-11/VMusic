@@ -54,6 +54,7 @@ const Contact = () => {
     try {
       // Send email using EmailJS
       const templateParams = {
+        title: 'VMusic Contact Support',
         from_name: formData.name,
         from_email: formData.email,
         phone: formData.phone || 'Not provided',
@@ -71,23 +72,21 @@ const Contact = () => {
 
       console.log('Email sent successfully:', emailResult);
 
-      // Also save to Firestore for backup
-      try {
-        await addDoc(collection(db, 'feedback'), {
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone || 'Not provided',
-          subject: formData.subject || 'No subject',
-          message: formData.message,
-          userId: currentUser?.uid || null,
-          createdAt: serverTimestamp(),
-          status: 'new',
-        });
-      } catch (firestoreError) {
+      // Save to Firestore for backup (fire and forget - non-blocking)
+      addDoc(collection(db, 'feedback'), {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone || 'Not provided',
+        subject: formData.subject || 'No subject',
+        message: formData.message,
+        userId: currentUser?.uid || null,
+        createdAt: serverTimestamp(),
+        status: 'new',
+      }).catch((firestoreError) => {
         console.warn('Firestore save failed, but email was sent:', firestoreError);
-      }
+      });
 
-      // Reset form first
+      // Reset form
       setFormData({
         name: currentUser?.displayName || '',
         email: currentUser?.email || '',

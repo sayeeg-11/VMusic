@@ -58,6 +58,7 @@ const Footer = () => {
     try {
       // Send newsletter subscription email
       const templateParams = {
+        title: 'VMusic Newsletter Subscription',
         from_name: 'Newsletter Subscriber',
         from_email: email,
         subject: 'Newsletter Subscription',
@@ -66,40 +67,41 @@ const Footer = () => {
         name: email,
       };
 
-      await emailjs.send(
+      const result = await emailjs.send(
         import.meta.env.VITE_EMAILJS_SERVICE_ID,
         import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
         templateParams,
         import.meta.env.VITE_EMAILJS_USER_ID
       );
 
-      // Save to Firestore
-      try {
-        await addDoc(collection(db, 'newsletter'), {
-          email: email,
-          subscribedAt: serverTimestamp(),
-          status: 'active',
-        });
-      } catch (firestoreError) {
-        console.warn('Firestore save failed:', firestoreError);
-      }
+      console.log('Newsletter email sent:', result);
 
+      // Save to Firestore (non-blocking - fire and forget)
+      addDoc(collection(db, 'newsletter'), {
+        email: email,
+        subscribedAt: serverTimestamp(),
+        status: 'active',
+      }).catch((firestoreError) => {
+        console.warn('Firestore save failed:', firestoreError);
+      });
+
+      // Update UI immediately
+      setEmail('');
       setStatus({
         type: 'success',
         message: 'Successfully subscribed!',
       });
-      setEmail('');
+      setLoading(false);
       
       setTimeout(() => setStatus({ type: '', message: '' }), 5000);
     } catch (error) {
       console.error('Error subscribing to newsletter:', error);
+      setLoading(false);
       setStatus({
         type: 'error',
         message: 'Subscription failed. Please try again.',
       });
       setTimeout(() => setStatus({ type: '', message: '' }), 3000);
-    } finally {
-      setLoading(false);
     }
   };
 
