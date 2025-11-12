@@ -53,9 +53,10 @@ export const AuthProvider = ({ children }) => {
 
       return userRef;
     } catch (error) {
-      // Handle offline or network errors gracefully
+      // Handle offline or network errors gracefully (silently)
       if (error.code === 'unavailable' || error.message?.includes('offline')) {
-        console.warn('Firestore is offline, user document will be created when connection is restored');
+        // Firestore is offline - this is normal and will sync when online
+        return null;
       } else {
         console.error('Error accessing user document:', error);
       }
@@ -96,11 +97,17 @@ export const AuthProvider = ({ children }) => {
   // Listen for auth state changes
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        await createUserDocument(user);
+      try {
+        if (user) {
+          await createUserDocument(user);
+        }
+        setCurrentUser(user);
+      } catch (error) {
+        // Silently handle auth state change errors
+        console.error('Auth state change error:', error);
+      } finally {
+        setLoading(false);
       }
-      setCurrentUser(user);
-      setLoading(false);
     });
 
     return unsubscribe;

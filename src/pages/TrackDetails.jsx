@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Play, Pause, Heart, Plus, Share2, Clock, Music2, User, Calendar, Download } from 'lucide-react';
+import { Play, Pause, Heart, Plus, Share2, Clock, Music2, User, Users, Calendar, Download, ExternalLink } from 'lucide-react';
 import { usePlayer } from '../contexts/PlayerContext';
 import { useAuth } from '../contexts/AuthContext';
+import { toast } from '../components/Toast';
 import jamendoAPI from '../api/jamendo';
 import { doc, getDoc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { db } from '../config/firebase';
@@ -77,7 +78,7 @@ const TrackDetails = () => {
 
   const toggleLike = async () => {
     if (!currentUser) {
-      navigate('/login');
+      toast.show('Please sign in to like tracks', 'error');
       return;
     }
 
@@ -241,7 +242,16 @@ const TrackDetails = () => {
             </button>
 
             {/* Add to Playlist */}
-            <button className="p-3 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-all">
+            <button 
+              onClick={() => {
+                if (!currentUser) {
+                  toast.show('Please sign in to add tracks to playlists', 'error');
+                } else {
+                  toast.show('Playlist feature coming soon!', 'info');
+                }
+              }}
+              className="p-3 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-all"
+            >
               <Plus size={28} />
             </button>
 
@@ -302,31 +312,88 @@ const TrackDetails = () => {
           {/* Sidebar - Artist Info */}
           {artist && (
             <div className="space-y-6">
-              <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-                <h3 className="text-white font-semibold mb-4">About Artist</h3>
-                <button
-                  onClick={() => navigate(`/artist/${artist.id}`)}
-                  className="group w-full"
-                >
-                  <div className="flex items-center gap-4 mb-4">
-                    <img
-                      src={artist.image || 'https://via.placeholder.com/100'}
-                      alt={artist.name}
-                      className="w-16 h-16 rounded-full object-cover"
-                    />
-                    <div className="text-left">
-                      <p className="text-white font-semibold group-hover:text-green-500 transition-colors">
-                        {artist.name}
+              <div className="bg-gradient-to-br from-white/5 to-white/[0.02] border border-white/10 rounded-xl p-6 backdrop-blur-sm">
+                <h3 className="text-white font-bold text-lg mb-6">About Artist</h3>
+                
+                {/* Artist Profile */}
+                <div className="mb-6">
+                  <button
+                    onClick={() => navigate(`/artist/${artist.id}`)}
+                    className="group w-full"
+                  >
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="relative">
+                        <img
+                          src={artist.image || 'https://via.placeholder.com/100'}
+                          alt={artist.name}
+                          className="w-20 h-20 rounded-full object-cover border-2 border-white/10 group-hover:border-green-500/50 transition-all"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                      <div className="text-left flex-1">
+                        <p className="text-white font-bold text-xl group-hover:text-green-500 transition-colors">
+                          {artist.name}
+                        </p>
+                        <p className="text-gray-400 text-sm">Artist</p>
+                      </div>
+                    </div>
+                  </button>
+
+                  {/* Artist Stats */}
+                  <div className="grid grid-cols-2 gap-3 mb-6">
+                    {/* Followers/Fans */}
+                    <div className="bg-white/5 border border-white/10 rounded-lg p-3">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Users className="text-green-500" size={16} />
+                        <p className="text-gray-400 text-xs">Fans</p>
+                      </div>
+                      <p className="text-white font-bold text-sm">
+                        {artist.stats?.fans ? artist.stats.fans.toLocaleString() : 'N/A'}
                       </p>
-                      <p className="text-gray-400 text-sm">Artist</p>
+                    </div>
+
+                    {/* Tracks Count */}
+                    <div className="bg-white/5 border border-white/10 rounded-lg p-3">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Music2 className="text-green-500" size={16} />
+                        <p className="text-gray-400 text-xs">Tracks</p>
+                      </div>
+                      <p className="text-white font-bold text-sm">
+                        {artist.stats?.tracks || 'N/A'}
+                      </p>
                     </div>
                   </div>
-                </button>
+
+                  {/* Artist Location */}
+                  {artist.location && (
+                    <div className="mb-4 flex items-center gap-2 text-gray-400 text-sm">
+                      <User size={16} />
+                      <span>From {artist.location}</span>
+                    </div>
+                  )}
+
+                  {/* Artist Website */}
+                  {artist.website && (
+                    <div className="mb-4">
+                      <a
+                        href={artist.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 text-green-500 hover:text-green-400 text-sm transition-colors"
+                      >
+                        <ExternalLink size={16} />
+                        <span>Visit Website</span>
+                      </a>
+                    </div>
+                  )}
+                </div>
+
+                {/* View Profile Button */}
                 <button
                   onClick={() => navigate(`/artist/${artist.id}`)}
-                  className="w-full px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition-all text-sm font-semibold"
+                  className="w-full px-4 py-3 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white rounded-lg transition-all text-sm font-bold shadow-lg shadow-green-500/25"
                 >
-                  View Artist Profile
+                  View Full Profile
                 </button>
               </div>
             </div>

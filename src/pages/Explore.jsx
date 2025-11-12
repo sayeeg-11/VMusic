@@ -3,10 +3,15 @@ import { motion } from 'framer-motion';
 import { Play, Heart, TrendingUp, Clock, Music2 } from 'lucide-react';
 import jamendoAPI from '../api/jamendo';
 import { usePlayer } from '../contexts/PlayerContext';
+import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { toast } from '../components/Toast';
+import { doc, getDoc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
+import { db } from '../config/firebase';
 
 const Explore = () => {
   const { playTrack } = usePlayer();
+  const { currentUser } = useAuth();
   const navigate = useNavigate();
   const [tracks, setTracks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -40,6 +45,27 @@ const Explore = () => {
     setHasMore(true);
     fetchTracks();
   }, [activeCategory, activeGenre]);
+
+  useEffect(() => {
+    if (currentUser) {
+      loadLikedTracks();
+    }
+  }, [currentUser]);
+
+  const loadLikedTracks = async () => {
+    try {
+      const userRef = doc(db, 'users', currentUser.uid);
+      const userSnap = await getDoc(userRef);
+      
+      if (userSnap.exists()) {
+        const userData = userSnap.data();
+        const likedTrackIds = userData.likedTracks || [];
+        setLikedTracks(new Set(likedTrackIds));
+      }
+    } catch (error) {
+      console.error('Error loading liked tracks:', error);
+    }
+  };
 
   const fetchTracks = async () => {
     setLoading(true);
@@ -110,16 +136,42 @@ const Explore = () => {
     }
   };
 
-  const toggleLike = (trackId) => {
-    setLikedTracks(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(trackId)) {
-        newSet.delete(trackId);
+  const toggleLike = async (trackId) => {
+    // Check if user is logged in
+    if (!currentUser) {
+      toast.show('Please sign in to like tracks', 'error');
+      return;
+    }
+
+    try {
+      const userRef = doc(db, 'users', currentUser.uid);
+      const isLiked = likedTracks.has(trackId);
+
+      if (isLiked) {
+        await updateDoc(userRef, {
+          likedTracks: arrayRemove(trackId),
+        });
+        setLikedTracks(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(trackId);
+          return newSet;
+        });
+        toast.show('Removed from favorites', 'info');
       } else {
-        newSet.add(trackId);
+        await updateDoc(userRef, {
+          likedTracks: arrayUnion(trackId),
+        });
+        setLikedTracks(prev => {
+          const newSet = new Set(prev);
+          newSet.add(trackId);
+          return newSet;
+        });
+        toast.show('Added to favorites', 'info');
       }
-      return newSet;
-    });
+    } catch (error) {
+      console.error('Error toggling like:', error);
+      toast.show('Failed to update favorites', 'error');
+    }
   };
 
   return (

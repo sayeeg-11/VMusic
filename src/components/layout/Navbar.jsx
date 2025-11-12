@@ -12,7 +12,9 @@ import {
   LogOut,
   Menu,
   X,
-  Mail
+  Mail,
+  MapPin,
+  Users
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { SignIn, SignUp } from '../auth';
@@ -45,6 +47,8 @@ const Navbar = () => {
   const guestLinks = [
     { name: 'Home', path: '/', icon: Home },
     { name: 'Explore', path: '/explore', icon: Compass },
+    { name: 'Artists', path: '/artists', icon: Users },
+    { name: 'By Location', path: '/artists-by-location', icon: MapPin },
     { name: 'About', path: '/about', icon: Music2 },
     { name: 'Contact', path: '/contact', icon: Mail },
   ];
@@ -52,6 +56,8 @@ const Navbar = () => {
   const userLinks = [
     { name: 'Dashboard', path: '/dashboard', icon: Home },
     { name: 'Explore', path: '/explore', icon: Compass },
+    { name: 'Artists', path: '/artists', icon: Users },
+    { name: 'By Location', path: '/artists-by-location', icon: MapPin },
     { name: 'Favorites', path: '/favorites', icon: Heart },
     { name: 'Playlists', path: '/playlists', icon: ListMusic },
     { name: 'Contact', path: '/contact', icon: Mail },

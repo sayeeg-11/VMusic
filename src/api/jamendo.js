@@ -117,6 +117,52 @@ export const jamendoAPI = {
   },
 
   /**
+   * Get multiple artists with filters
+   * @param {Object} options - Query options
+   * @param {number} options.limit - Number of artists to fetch
+   * @param {string} options.order - Sort order
+   * @param {boolean} options.hasImage - Filter artists with images
+   * @returns {Promise<Object>} API response with artists
+   */
+  getArtists: async ({ limit = 50, order = 'popularity_total', hasImage } = {}) => {
+    try {
+      let url = `${BASE_URL}/artists/?client_id=${CLIENT_ID}&format=json&limit=${limit}&order=${order}`;
+      
+      if (hasImage) {
+        url += '&hasimage=true';
+      }
+
+      const response = await fetch(url);
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error fetching artists:', error);
+      return { headers: { status: 'error' }, results: [] };
+    }
+  },
+
+  /**
+   * Search artists by name
+   * @param {Object} options - Search options
+   * @param {string} options.query - Search query
+   * @param {number} options.limit - Number of results
+   * @param {string} options.order - Sort order
+   * @returns {Promise<Object>} API response with artists
+   */
+  searchArtists: async ({ query, limit = 50, order = 'popularity_total' } = {}) => {
+    try {
+      const response = await fetch(
+        `${BASE_URL}/artists/?client_id=${CLIENT_ID}&format=json&namesearch=${encodeURIComponent(query)}&limit=${limit}&order=${order}`
+      );
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error searching artists:', error);
+      return { headers: { status: 'error' }, results: [] };
+    }
+  },
+
+  /**
    * Get tracks by artist
    * @param {string} artistId - Artist ID
    * @param {number} limit - Number of tracks
@@ -203,6 +249,35 @@ export const jamendoAPI = {
       return data;
     } catch (error) {
       console.error('Error fetching playlists:', error);
+      return { headers: { status: 'error' }, results: [] };
+    }
+  },
+
+  /**
+   * Get artists by location
+   * @param {Object} options - Search options
+   * @param {string} options.country - Country code (ISO 3166-1)
+   * @param {string} options.city - City name
+   * @param {number} options.limit - Number of results
+   * @returns {Promise<Object>} API response with artists
+   */
+  getArtistsByLocation: async ({ country, city, limit = 50 }) => {
+    try {
+      let url = `${BASE_URL}/artists/locations/?client_id=${CLIENT_ID}&format=json&limit=${limit}&haslocation=true`;
+      
+      if (country) {
+        url += `&location_country=${country}`;
+      }
+      
+      if (city) {
+        url += `&location_city=${encodeURIComponent(city)}`;
+      }
+
+      const response = await fetch(url);
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error fetching artists by location:', error);
       return { headers: { status: 'error' }, results: [] };
     }
   },

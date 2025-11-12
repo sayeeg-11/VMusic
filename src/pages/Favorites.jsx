@@ -22,6 +22,7 @@ const Favorites = () => {
 
   const loadFavorites = async () => {
     try {
+      setLoading(true);
       const userRef = doc(db, 'users', currentUser.uid);
       const userSnap = await getDoc(userRef);
       
@@ -30,11 +31,23 @@ const Favorites = () => {
         const likedTrackIds = userData.likedTracks || [];
         setFavorites(likedTrackIds);
         
-        // For demo: Load some tracks from Jamendo
-        // In production, you'd store full track info in Firestore
+        // Load each liked track by ID
         if (likedTrackIds.length > 0) {
-          const data = await jamendoAPI.getTrendingTracks(20);
-          setTracks(data.results || []);
+          const trackPromises = likedTrackIds.map(async (trackId) => {
+            try {
+              const trackData = await jamendoAPI.getTrackById(trackId);
+              return trackData.results?.[0];
+            } catch (error) {
+              console.error(`Error loading track ${trackId}:`, error);
+              return null;
+            }
+          });
+          
+          const loadedTracks = await Promise.all(trackPromises);
+          // Filter out any null values (failed loads)
+          setTracks(loadedTracks.filter(track => track !== null));
+        } else {
+          setTracks([]);
         }
       }
     } catch (error) {
@@ -52,12 +65,13 @@ const Favorites = () => {
       });
       
       setFavorites(prev => prev.filter(id => id !== trackId));
+      setTracks(prev => prev.filter(track => track.id !== trackId));
     } catch (error) {
       console.error('Error removing favorite:', error);
     }
   };
 
-  const displayedTracks = tracks.filter(track => favorites.includes(track.id));
+  const displayedTracks = tracks;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-900 to-black pb-20">

@@ -1,14 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { User, Mail, Lock, Save, Camera, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { updateProfile, updatePassword, updateEmail } from 'firebase/auth';
+import { updateProfile, updatePassword } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { db, storage } from '../config/firebase';
+import { toast } from '../components/Toast';
 
 const Profile = () => {
   const { currentUser } = useAuth();
+  const fileInputRef = useRef(null);
   const [loading, setLoading] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
 
   // Form states
@@ -119,6 +123,55 @@ const Profile = () => {
     }
   };
 
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.show('Please select an image file', 'error');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.show('Image size should be less than 5MB', 'error');
+      return;
+    }
+
+    setUploadingPhoto(true);
+
+    try {
+      // Create a reference to storage
+      const storageRef = ref(storage, `profile-pictures/${currentUser.uid}/${file.name}`);
+      
+      // Upload file
+      await uploadBytes(storageRef, file);
+      
+      // Get download URL
+      const photoURL = await getDownloadURL(storageRef);
+      
+      // Update user profile
+      await updateProfile(currentUser, { photoURL });
+      
+      // Save to Firestore
+      await setDoc(doc(db, 'users', currentUser.uid), {
+        photoURL,
+        updatedAt: new Date().toISOString(),
+      }, { merge: true });
+
+      toast.show('Profile picture updated successfully!', 'info');
+      
+      // Reload the page to show new photo
+      window.location.reload();
+    } catch (error) {
+      console.error('Error uploading photo:', error);
+      toast.show('Failed to upload photo. Please try again.', 'error');
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-900 to-black pb-20">
       {/* Header */}
@@ -134,18 +187,35 @@ const Profile = () => {
           >
             {/* Avatar */}
             <div className="relative inline-block mb-4">
-              <div className="w-24 h-24 rounded-full overflow-hidden bg-gradient-to-r from-purple-600 to-indigo-600 flex items-center justify-center shadow-xl">
+              <div className="w-24 h-24 rounded-full overflow-hidden bg-gradient-to-r from-purple-600 to-indigo-600 flex items-center justify-center shadow-xl border-4 border-white/10">
                 {currentUser?.photoURL ? (
                   <img src={currentUser.photoURL} alt="Profile" className="w-full h-full object-cover" />
                 ) : (
                   <User size={48} className="text-white" />
                 )}
               </div>
+              
+              {/* Hidden file input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoUpload}
+                className="hidden"
+              />
+              
+              {/* Upload button */}
               <button
-                className="absolute bottom-0 right-0 w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center hover:bg-purple-700 transition-colors shadow-lg"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadingPhoto}
+                className="absolute bottom-0 right-0 w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center hover:bg-purple-700 transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Change avatar"
               >
-                <Camera size={16} className="text-white" />
+                {uploadingPhoto ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Camera size={16} className="text-white" />
+                )}
               </button>
             </div>
 
