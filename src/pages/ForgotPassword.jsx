@@ -18,17 +18,11 @@ const ForgotPassword = () => {
     setLoading(true);
 
     try {
-      // Configure action code settings for password reset
-      const actionCodeSettings = {
-        url: window.location.origin + '/reset-password',
-        handleCodeInApp: true,
-      };
-
       console.log('Sending password reset email to:', email);
-      console.log('Action code settings:', actionCodeSettings);
-      console.log('Auth domain:', auth.config.authDomain);
       
-      await sendPasswordResetEmail(auth, email, actionCodeSettings);
+      // Send password reset email without custom action code settings
+      // Firebase will use the default URL structure which we'll handle in Landing.jsx
+      await sendPasswordResetEmail(auth, email);
       
       console.log('Password reset email sent successfully');
       console.log('✅ Email should arrive within 5-10 minutes');
@@ -175,36 +169,6 @@ const ForgotPassword = () => {
               <Link to="/" className="text-purple-400 hover:text-purple-300 font-semibold transition-colors">
                 Sign In
               </Link>
-            </p>
-          </div>
-        </motion.div>
-
-        {/* Info Card */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-          className="mt-6 bg-white/5 border border-white/10 rounded-lg p-4 backdrop-blur-sm space-y-3"
-        >
-          <div className="flex items-start gap-2">
-            <Info size={16} className="text-blue-400 flex-shrink-0 mt-0.5" />
-            <p className="text-gray-400 text-xs">
-              <strong className="text-gray-300">Not receiving emails?</strong> Here's what to check:
-            </p>
-          </div>
-          
-          <ul className="text-gray-400 text-xs space-y-2 ml-6">
-            <li>✉️ Check your <strong className="text-gray-300">spam/junk folder</strong></li>
-            <li>📧 Look for email from <strong className="text-gray-300">noreply@vmusic-7806a.firebaseapp.com</strong></li>
-            <li>⏰ Wait 5-10 minutes (sometimes emails are delayed)</li>
-            <li>📱 Check all Gmail tabs (Promotions, Social, Updates)</li>
-            <li>🔍 Search your inbox for "VMusic" or "Reset password"</li>
-            <li>⚙️ Make sure the email <strong className="text-gray-300">{email || 'you entered'}</strong> is correct</li>
-          </ul>
-          
-          <div className="pt-2 border-t border-white/10">
-            <p className="text-gray-500 text-xs">
-              💡 The reset link expires in <strong className="text-gray-400">1 hour</strong>
             </p>
           </div>
         </motion.div>
