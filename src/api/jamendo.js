@@ -530,6 +530,44 @@ export const jamendoAPI = {
       return { headers: { status: 'error' }, results: [] };
     }
   },
+
+  /**
+   * Get download URL for album
+   * This returns the actual download URL for the album zip file
+   * @param {string} albumId - Album ID
+   * @param {string} audioFormat - Audio format (default: mp32)
+   * @returns {string} Download URL
+   */
+  getAlbumDownloadUrl: (albumId, audioFormat = 'mp32') => {
+    return `${BASE_URL}/albums/file/?client_id=${CLIENT_ID}&id=${albumId}&audioformat=${audioFormat}`;
+  },
+
+  /**
+   * Check if album download is allowed
+   * @param {string} albumId - Album ID
+   * @returns {Promise<Object>} Album data with zip_allowed field
+   */
+  checkAlbumDownload: async (albumId) => {
+    try {
+      const url = `${BASE_URL}/albums/?client_id=${CLIENT_ID}&format=json&id=${albumId}`;
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      if (data.results && data.results.length > 0) {
+        return {
+          allowed: data.results[0].zip_allowed || false,
+          zipUrl: data.results[0].zip || null,
+          album: data.results[0]
+        };
+      }
+      return { allowed: false, zipUrl: null, album: null };
+    } catch (error) {
+      console.error('Error checking album download:', error);
+      return { allowed: false, zipUrl: null, album: null };
+    }
+  },
 };
 
 export default jamendoAPI;
