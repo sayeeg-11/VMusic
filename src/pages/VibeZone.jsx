@@ -42,7 +42,7 @@ const VibeZone = () => {
   const [tracks, setTracks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('bollywood');
+  const [selectedCategory, setSelectedCategory] = useState('trending');
   const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
   const [favorites, setFavorites] = useState([]);
   const [volume, setVolume] = useState(0.7);
@@ -52,13 +52,13 @@ const VibeZone = () => {
   const [tokenExpiry, setTokenExpiry] = useState(null);
 
   const categories = [
-    { id: 'hindi', name: 'Hindi Vibes', icon: Music2, query: 'hindi' },
-    { id: 'bollywood', name: 'Bollywood', icon: Sparkles, query: 'bollywood' },
-    { id: 'romantic', name: 'Romantic', icon: Heart, query: 'romantic hindi' },
-    { id: 'trending', name: 'Trending', icon: TrendingUp, query: 'trending india' },
-    { id: 'lofi', name: 'Lo-Fi', icon: Disc3, query: 'lofi' },
-    { id: 'party', name: 'Party', icon: Music2, query: 'party' },
-    { id: 'chill', name: 'Chill', icon: Music2, query: 'chill' },
+    { id: 'hindi', name: 'Hindi Vibes', icon: Music2, query: 'year:2023-2024 hindi' },
+    { id: 'bollywood', name: 'Bollywood', icon: Sparkles, query: 'year:2023-2024 bollywood' },
+    { id: 'romantic', name: 'Romantic', icon: Heart, query: 'romantic songs' },
+    { id: 'trending', name: 'Trending', icon: TrendingUp, query: 'top hits 2024' },
+    { id: 'lofi', name: 'Lo-Fi', icon: Disc3, query: 'lofi hip hop' },
+    { id: 'party', name: 'Party', icon: Music2, query: 'party hits' },
+    { id: 'chill', name: 'Chill', icon: Music2, query: 'chill vibes' },
   ];
 
   useEffect(() => {
@@ -318,7 +318,7 @@ const VibeZone = () => {
               </div>
               <div>
                 <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">
-                  � Vibe Zone
+                  🎧 Vibe Zone
                 </h1>
                 <p className="text-gray-300 text-lg">
                   Discover trending <span className="text-pink-400 font-semibold">Hindi</span> tracks and fresh vibes from Spotify
