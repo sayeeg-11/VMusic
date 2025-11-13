@@ -40,21 +40,11 @@ const HowItWorks = () => {
           transition={{ duration: 0.6 }}
           className="text-center mb-20"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900/30 dark:to-blue-900/30 rounded-full mb-6">
-            <Sparkles className="text-purple-600 dark:text-purple-400" size={20} />
-            <span className="text-sm font-semibold text-purple-900 dark:text-purple-300">
-              Powered by Jamendo + Spotify
-            </span>
-          </div>
           <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900 dark:text-white">
             How It Works
           </h2>
           <p className="text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
-            Get started with VMusic in three simple steps. Access millions of tracks from both Jamendo and Spotify.
-            <br />
-            <span className="text-sm text-purple-600 dark:text-purple-400 font-medium">
-              🎵 Guest Mode: Full Jamendo tracks + 30s Spotify previews | 🔐 Logged In: Enhanced Spotify features
-            </span>
+            Get started with VMusic in three simple steps. Access millions of tracks and discover your next favorite song.
           </p>
         </motion.div>
 

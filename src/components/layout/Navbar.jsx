@@ -27,6 +27,7 @@ const Navbar = () => {
   const [showSignIn, setShowSignIn] = useState(false);
   const [showSignUp, setShowSignUp] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showSearchBar, setShowSearchBar] = useState(false);
   
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
@@ -37,6 +38,7 @@ const Navbar = () => {
       navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
       setSearchQuery('');
       setShowMobileMenu(false);
+      setShowSearchBar(false);
     }
   };
 
@@ -97,19 +99,31 @@ const Navbar = () => {
               ))}
             </div>
 
-            {/* Search Bar */}
-            <form onSubmit={handleSearch} className="hidden md:flex items-center flex-1 max-w-md mx-8">
-              <div className="relative w-full">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search songs, artists..."
-                  className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-full text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                />
-              </div>
-            </form>
+            {/* Search Icon (when logged in) or Search Bar (when not logged in) */}
+            <div className="hidden md:flex items-center">
+              {currentUser ? (
+                <button
+                  onClick={() => setShowSearchBar(!showSearchBar)}
+                  className="p-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-gray-400 hover:text-white transition-all"
+                  title="Search"
+                >
+                  <Search size={20} />
+                </button>
+              ) : (
+                <form onSubmit={handleSearch} className="flex items-center flex-1 max-w-md mx-8">
+                  <div className="relative w-full">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search songs, artists..."
+                      className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-full text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                    />
+                  </div>
+                </form>
+              )}
+            </div>
 
             {/* Auth Buttons / User Menu */}
             <div className="hidden md:flex items-center gap-3">
@@ -202,6 +216,40 @@ const Navbar = () => {
             </div>
           </form>
         </div>
+
+        {/* Full Width Search Bar (appears below header when logged in) */}
+        <AnimatePresence>
+          {currentUser && showSearchBar && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="border-t border-white/10 bg-gray-900/95 backdrop-blur-lg overflow-hidden"
+            >
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                <form onSubmit={handleSearch} className="relative">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search for songs, artists, albums..."
+                    className="w-full pl-12 pr-12 py-3 bg-white/5 border border-white/20 rounded-full text-white text-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                    autoFocus
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowSearchBar(false)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-white transition-colors"
+                  >
+                    <X size={20} />
+                  </button>
+                </form>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Mobile Menu */}
         <AnimatePresence>

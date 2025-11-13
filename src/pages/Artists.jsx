@@ -8,6 +8,7 @@ const Artists = () => {
   const navigate = useNavigate();
   const [artists, setArtists] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('popularity_total');
   const [hasImage, setHasImage] = useState(false);
@@ -15,6 +16,7 @@ const Artists = () => {
   const [selectedCountry, setSelectedCountry] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
   const [showLocationFilter, setShowLocationFilter] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
 
   // Popular countries for quick selection
   const popularCountries = [
@@ -46,8 +48,28 @@ const Artists = () => {
     fetchArtists();
   }, [sortBy, hasImage, selectedCountry, selectedCity]);
 
+  // Infinite scroll effect
+  useEffect(() => {
+    const handleScroll = () => {
+      if (loadingMore || !hasMore) return;
+
+      const scrollTop = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const docHeight = document.documentElement.scrollHeight;
+
+      if (scrollTop + windowHeight >= docHeight - 500) {
+        loadMoreArtists();
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [loadingMore, hasMore, limit]);
+
   const fetchArtists = async () => {
     setLoading(true);
+    setLimit(50); // Reset limit when filters change
+    setHasMore(true);
     try {
       let data;
       if (selectedCountry || selectedCity) {
@@ -65,11 +87,60 @@ const Artists = () => {
         });
       }
       setArtists(data.results || []);
+      if (data.results && data.results.length < 50) {
+        setHasMore(false);
+      }
     } catch (error) {
       console.error('Error fetching artists:', error);
       setArtists([]);
+      setHasMore(false);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadMoreArtists = async () => {
+    if (loadingMore || !hasMore) return;
+    
+    setLoadingMore(true);
+    const newLimit = limit + 50;
+    
+    try {
+      let data;
+      if (searchQuery.trim()) {
+        data = await jamendoAPI.searchArtistsWithAlbums({
+          query: searchQuery,
+          limit: newLimit,
+          order: sortBy,
+        });
+      } else if (selectedCountry || selectedCity) {
+        data = await jamendoAPI.getArtistsByLocationWithAlbums({
+          country: selectedCountry,
+          city: selectedCity,
+          limit: newLimit,
+          order: sortBy,
+        });
+      } else {
+        data = await jamendoAPI.getArtistsWithAlbums({
+          limit: newLimit,
+          order: sortBy,
+          hasImage: hasImage || undefined,
+        });
+      }
+      
+      if (data.results) {
+        setArtists(data.results);
+        setLimit(newLimit);
+        
+        if (data.results.length < newLimit) {
+          setHasMore(false);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading more artists:', error);
+      setHasMore(false);
+    } finally {
+      setLoadingMore(false);
     }
   };
 
@@ -81,16 +152,22 @@ const Artists = () => {
     }
 
     setLoading(true);
+    setLimit(50);
+    setHasMore(true);
     try {
       const data = await jamendoAPI.searchArtistsWithAlbums({
         query: searchQuery,
-        limit,
+        limit: 50,
         order: sortBy,
       });
       setArtists(data.results || []);
+      if (data.results && data.results.length < 50) {
+        setHasMore(false);
+      }
     } catch (error) {
       console.error('Error searching artists:', error);
       setArtists([]);
+      setHasMore(false);
     } finally {
       setLoading(false);
     }
@@ -112,15 +189,11 @@ const Artists = () => {
     setSelectedCity('');
   };
 
-  const loadMore = () => {
-    setLimit(prev => prev + 50);
-  };
-
   useEffect(() => {
     if (limit > 50) {
-      fetchArtists();
+      loadMoreArtists();
     }
-  }, [limit]);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-900 to-black pb-20">
@@ -340,119 +413,149 @@ const Artists = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.02 }}
-                  className="group bg-white/5 hover:bg-white/10 rounded-xl overflow-hidden transition-all border border-white/10 hover:border-white/20"
+                  whileHover={{ y: -4 }}
+                  className="group relative bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-sm rounded-2xl overflow-hidden transition-all border border-white/10 hover:border-purple-500/50 shadow-xl hover:shadow-2xl hover:shadow-purple-500/20"
                 >
+                  {/* Gradient Overlay on Hover */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-purple-600/0 via-pink-600/0 to-indigo-600/0 group-hover:from-purple-600/10 group-hover:via-pink-600/10 group-hover:to-indigo-600/10 transition-all duration-500 pointer-events-none" />
+                  
                   {/* Artist Header */}
                   <div 
-                    className="p-4 cursor-pointer flex items-center gap-4 hover:bg-white/5 transition-all"
+                    className="relative p-6 cursor-pointer"
                     onClick={() => navigate(`/artist/${artist.id}`)}
                   >
-                    {/* Artist Image */}
-                    <div className="relative flex-shrink-0">
-                      <div className="w-16 h-16 rounded-full overflow-hidden bg-gradient-to-br from-purple-600 to-pink-600">
-                        {artist.image ? (
-                          <img
-                            src={artist.image}
-                            alt={artist.name}
-                            className="w-full h-full object-cover"
-                            loading="lazy"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <Users size={24} className="text-white/50" />
+                    {/* Artist Image with Glow Effect */}
+                    <div className="relative flex-shrink-0 mb-4">
+                      <div className="absolute inset-0 bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 rounded-full blur-xl opacity-0 group-hover:opacity-50 transition-opacity duration-500" />
+                      <div className="relative w-20 h-20 mx-auto rounded-full overflow-hidden bg-gradient-to-br from-purple-600 via-pink-600 to-indigo-600 p-1 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                        <div className="w-full h-full rounded-full overflow-hidden bg-gray-900">
+                          {artist.image ? (
+                            <img
+                              src={artist.image}
+                              alt={artist.name}
+                              className="w-full h-full object-cover"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-600/20 to-pink-600/20">
+                              <Users size={28} className="text-white/70" />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Artist Name - Premium Display */}
+                    <div className="text-center mb-4">
+                      <h3 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-purple-200 to-pink-200 mb-2 group-hover:from-purple-300 group-hover:via-pink-300 group-hover:to-indigo-300 transition-all duration-300 line-clamp-2 px-2">
+                        {artist.name}
+                      </h3>
+                      
+                      {/* Artist Metadata */}
+                      <div className="flex items-center justify-center gap-4 text-gray-400 text-sm">
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 group-hover:border-purple-500/30 transition-colors">
+                          <Calendar size={14} className="text-purple-400" />
+                          <span className="font-medium">{new Date(artist.joindate).getFullYear()}</span>
+                        </div>
+                        {artist.albums && artist.albums.length > 0 && (
+                          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 group-hover:border-pink-500/30 transition-colors">
+                            <Music2 size={14} className="text-pink-400" />
+                            <span className="font-medium">{artist.albums.length} {artist.albums.length !== 1 ? 'albums' : 'album'}</span>
                           </div>
                         )}
                       </div>
                     </div>
 
-                    {/* Artist Info */}
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-white font-semibold mb-1 truncate group-hover:text-purple-400 transition-colors">
-                        {artist.name}
-                      </h3>
-                      <div className="flex items-center gap-3 text-gray-400 text-sm">
-                        <div className="flex items-center gap-1">
-                          <Calendar size={14} />
-                          <span>{new Date(artist.joindate).getFullYear()}</span>
-                        </div>
-                        {artist.albums && artist.albums.length > 0 && (
-                          <div className="flex items-center gap-1">
-                            <Music2 size={14} />
-                            <span>{artist.albums.length} album{artist.albums.length !== 1 ? 's' : ''}</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                    {/* Divider */}
+                    <div className="w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent mb-4" />
                   </div>
 
                   {/* Albums List */}
                   {artist.albums && artist.albums.length > 0 && (
-                    <div className="px-4 pb-4 space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
-                      {artist.albums.slice(0, 5).map((album) => (
+                    <div className="relative px-6 pb-6 space-y-2 max-h-64 overflow-y-auto custom-scrollbar">
+                      {/* Albums Header */}
+                      <div className="flex items-center gap-2 mb-3 pt-1 pb-2 border-t border-white/10">
+                        <Music2 size={16} className="text-cyan-400" />
+                        <span className="text-sm font-semibold text-cyan-300">Albums ({artist.albums.length})</span>
+                      </div>
+                      
+                      {artist.albums.map((album) => (
                         <motion.div
                           key={album.id}
-                          whileHover={{ x: 4 }}
-                          className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-all cursor-pointer"
+                          whileHover={{ x: 6, scale: 1.02 }}
+                          className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-gradient-to-r hover:from-cyan-500/10 hover:to-blue-500/10 transition-all cursor-pointer border border-transparent hover:border-cyan-500/30 group/album"
                           onClick={(e) => {
                             e.stopPropagation();
                             navigate(`/album/${album.id}`);
                           }}
                         >
                           {/* Album Cover */}
-                          <div className="w-12 h-12 rounded-md overflow-hidden bg-white/5 flex-shrink-0">
+                          <div className="relative w-14 h-14 rounded-lg overflow-hidden bg-white/5 flex-shrink-0 shadow-md group-hover/album:shadow-lg group-hover/album:shadow-cyan-500/20 transition-shadow">
+                            <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 opacity-0 group-hover/album:opacity-100 transition-opacity" />
                             {album.image ? (
                               <img
                                 src={album.image}
                                 alt={album.name}
-                                className="w-full h-full object-cover"
+                                className="relative w-full h-full object-cover group-hover/album:scale-110 transition-transform duration-300"
                                 loading="lazy"
                               />
                             ) : (
-                              <div className="w-full h-full flex items-center justify-center">
-                                <Music2 size={16} className="text-white/30" />
+                              <div className="relative w-full h-full flex items-center justify-center">
+                                <Music2 size={20} className="text-white/30 group-hover/album:text-white/50 transition-colors" />
                               </div>
                             )}
                           </div>
 
                           {/* Album Info */}
                           <div className="flex-1 min-w-0">
-                            <p className="text-white text-sm font-medium truncate hover:text-purple-400 transition-colors">
+                            <p className="text-white text-sm font-semibold truncate group-hover/album:text-cyan-300 transition-colors mb-1">
                               {album.name}
                             </p>
-                            <p className="text-gray-400 text-xs">
-                              {new Date(album.releasedate).getFullYear()}
-                            </p>
+                            <div className="flex items-center gap-2">
+                              <span className="text-gray-400 text-xs px-2 py-0.5 rounded-full bg-white/5 border border-white/10">
+                                {new Date(album.releasedate).getFullYear()}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Hover Arrow */}
+                          <div className="opacity-0 group-hover/album:opacity-100 transition-opacity">
+                            <div className="w-6 h-6 rounded-full bg-cyan-500/20 flex items-center justify-center">
+                              <svg className="w-3 h-3 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                              </svg>
+                            </div>
                           </div>
                         </motion.div>
                       ))}
-                      
-                      {artist.albums.length > 5 && (
-                        <p className="text-gray-400 text-xs text-center pt-2">
-                          +{artist.albums.length - 5} more album{artist.albums.length - 5 !== 1 ? 's' : ''}
-                        </p>
-                      )}
                     </div>
                   )}
 
                   {/* No Albums Message */}
                   {(!artist.albums || artist.albums.length === 0) && (
-                    <div className="px-4 pb-4 text-center">
-                      <p className="text-gray-500 text-sm">No albums available</p>
+                    <div className="relative px-6 pb-6 text-center">
+                      <div className="py-6 rounded-xl bg-white/5 border border-dashed border-white/10">
+                        <Music2 size={24} className="text-gray-500 mx-auto mb-2" />
+                        <p className="text-gray-500 text-sm font-medium">No albums available</p>
+                      </div>
                     </div>
                   )}
                 </motion.div>
               ))}
             </motion.div>
 
-            {/* Load More Button */}
-            {artists.length >= limit && (
+            {/* Loading More Indicator */}
+            {loadingMore && (
               <div className="mt-8 text-center">
-                <button
-                  onClick={loadMore}
-                  className="px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg"
-                >
-                  Load More Artists
-                </button>
+                <div className="w-12 h-12 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                <p className="text-gray-400">Loading more artists...</p>
+              </div>
+            )}
+
+            {/* End Message */}
+            {!hasMore && artists.length > 0 && (
+              <div className="mt-8 text-center">
+                <p className="text-gray-400">🎵 You've reached the end!</p>
               </div>
             )}
           </>

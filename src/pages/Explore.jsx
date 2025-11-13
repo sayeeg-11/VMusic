@@ -52,6 +52,25 @@ const Explore = () => {
     }
   }, [currentUser]);
 
+  // Infinite scroll effect
+  useEffect(() => {
+    const handleScroll = () => {
+      if (loadingMore || !hasMore || loading) return;
+
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const scrollHeight = document.documentElement.scrollHeight;
+      const clientHeight = window.innerHeight;
+
+      // Load more when user is 500px from bottom
+      if (scrollTop + clientHeight >= scrollHeight - 500) {
+        loadMoreTracks();
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [loadingMore, hasMore, loading, limit, activeCategory, activeGenre]);
+
   const loadLikedTracks = async () => {
     try {
       const userRef = doc(db, 'users', currentUser.uid);
@@ -257,12 +276,13 @@ const Explore = () => {
             ))}
           </div>
         ) : tracks.length > 0 ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4"
-          >
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4"
+            >
             {tracks.map((track, index) => (
               <motion.div
                 key={`${track.id}-${index}`}
@@ -320,37 +340,38 @@ const Explore = () => {
               </motion.div>
             ))}
           </motion.div>
-        ) : (
+
+          {/* Loading More Indicator */}
+          {loadingMore && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex flex-col items-center justify-center py-8"
+            >
+              <div className="w-12 h-12 border-4 border-pink-500/30 border-t-pink-500 rounded-full animate-spin mb-3"></div>
+              <p className="text-gray-400 text-sm">Loading more tracks...</p>
+            </motion.div>
+          )}
+
+          {/* No More Tracks Indicator */}
+          {!hasMore && tracks.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center py-8"
+            >
+              <p className="text-gray-400 text-sm">
+                🎵 You've reached the end! All tracks loaded.
+              </p>
+            </motion.div>
+          )}
+        </>
+      ) : (
           <div className="text-center py-20">
             <Music2 size={64} className="text-gray-600 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-white mb-2">No tracks found</h3>
             <p className="text-gray-400">Try selecting a different category or genre</p>
           </div>
-        )}
-
-        {/* Load More Button */}
-        {!loading && tracks.length > 0 && hasMore && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.6 }}
-            className="text-center mt-12"
-          >
-            <button 
-              onClick={loadMoreTracks}
-              disabled={loadingMore}
-              className="px-8 py-3 bg-white/5 hover:bg-white/10 text-white font-medium rounded-full border border-white/10 hover:border-white/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 mx-auto"
-            >
-              {loadingMore ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  Loading...
-                </>
-              ) : (
-                'Load More Tracks'
-              )}
-            </button>
-          </motion.div>
         )}
       </div>
     </div>

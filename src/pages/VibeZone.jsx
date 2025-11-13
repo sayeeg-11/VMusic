@@ -12,8 +12,13 @@ import {
   Filter,
   TrendingUp,
   Sparkles,
-  Disc3
+  Disc3,
+  AlertCircle,
+  ArrowRight,
+  Youtube,
+  X
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { doc, updateDoc, arrayUnion, arrayRemove, getDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
@@ -50,6 +55,10 @@ const VibeZone = () => {
   const audioRef = useRef(null);
   const [accessToken, setAccessToken] = useState(null);
   const [tokenExpiry, setTokenExpiry] = useState(null);
+  const [showApiLimitModal, setShowApiLimitModal] = useState(false);
+  const [offset, setOffset] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   const categories = [
     { id: 'hindi', name: 'Hindi Vibes', icon: Music2, query: 'year:2023-2024 hindi' },
@@ -70,9 +79,31 @@ const VibeZone = () => {
 
   useEffect(() => {
     if (accessToken) {
-      fetchTracks();
+      setTracks([]);
+      setOffset(0);
+      setHasMore(true);
+      fetchTracks(0);
     }
   }, [selectedCategory, accessToken]);
+
+  // Infinite scroll effect
+  useEffect(() => {
+    const handleScroll = () => {
+      if (loadingMore || !hasMore) return;
+
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const scrollHeight = document.documentElement.scrollHeight;
+      const clientHeight = window.innerHeight;
+
+      // Load more when user is 500px from bottom
+      if (scrollTop + clientHeight >= scrollHeight - 500) {
+        loadMoreTracks();
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [loadingMore, hasMore, offset, accessToken, selectedCategory, searchQuery]);
 
   const getSpotifyToken = async () => {
     try {
@@ -148,15 +179,20 @@ const VibeZone = () => {
     }
   };
 
-  const fetchTracks = async () => {
+  const fetchTracks = async (currentOffset = offset, append = false) => {
     if (!accessToken) return;
     
-    setLoading(true);
+    if (append) {
+      setLoadingMore(true);
+    } else {
+      setLoading(true);
+    }
+
     try {
       const category = categories.find(c => c.id === selectedCategory);
       const searchTerm = searchQuery || category.query;
       
-      const url = `https://api.spotify.com/v1/search?q=${encodeURIComponent(searchTerm)}&type=track&limit=20&market=IN`;
+      const url = `https://api.spotify.com/v1/search?q=${encodeURIComponent(searchTerm)}&type=track&limit=20&offset=${currentOffset}&market=IN`;
       
       const response = await fetch(url, {
         headers: {
@@ -179,13 +215,23 @@ const VibeZone = () => {
 
       const data = await response.json();
       
-      // Show all tracks, not just those with previews
-      setTracks(data.tracks.items);
+      // Check if there are more tracks
+      const newTracks = data.tracks.items;
+      if (newTracks.length === 0 || newTracks.length < 20) {
+        setHasMore(false);
+      }
+
+      // Append or replace tracks
+      if (append) {
+        setTracks(prev => [...prev, ...newTracks]);
+      } else {
+        setTracks(newTracks);
+      }
       
       // Count tracks with previews
-      const tracksWithPreview = data.tracks.items.filter(track => track.preview_url);
+      const tracksWithPreview = newTracks.filter(track => track.preview_url);
       
-      if (tracksWithPreview.length === 0 && data.tracks.items.length > 0) {
+      if (!append && tracksWithPreview.length === 0 && newTracks.length > 0) {
         toast.show('Tracks loaded, but previews may not be available', 'info');
       }
     } catch (error) {
@@ -193,13 +239,25 @@ const VibeZone = () => {
       toast.show('Failed to load tracks. Please try again.', 'error');
     } finally {
       setLoading(false);
+      setLoadingMore(false);
+    }
+  };
+
+  const loadMoreTracks = () => {
+    if (!loadingMore && hasMore) {
+      const newOffset = offset + 20;
+      setOffset(newOffset);
+      fetchTracks(newOffset, true);
     }
   };
 
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      fetchTracks();
+      setTracks([]);
+      setOffset(0);
+      setHasMore(true);
+      fetchTracks(0);
     }
   };
 
@@ -294,8 +352,122 @@ const VibeZone = () => {
     track.artists?.some(artist => artist.name.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-900 via-black to-gray-900 pb-32">
+      {/* API Limitation Modal */}
+      <AnimatePresence>
+        {showApiLimitModal && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50"
+              onClick={() => setShowApiLimitModal(false)}
+            />
+
+            {/* Modal */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ type: 'spring', duration: 0.5 }}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            >
+              <div className="rounded-3xl shadow-2xl max-w-lg w-full border border-[#522cd5]/30 overflow-hidden" style={{ background: '#0d0f21' }}>
+                {/* Header */}
+                <div className="relative border-b border-[#522cd5]/20 p-6" style={{ 
+                  background: 'linear-gradient(135deg, #522cd5 0%, #ff47b5 100%)',
+                  opacity: 0.15
+                }}>
+                  <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMDUpIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30"></div>
+                </div>
+                
+                <div className="relative p-6" style={{ background: '#0d0f21' }}>
+                  <div className="flex items-start gap-4 mb-6">
+                    <div className="w-14 h-14 rounded-full flex items-center justify-center shrink-0 animate-pulse shadow-lg shadow-[#ff47b5]/50" style={{
+                      background: 'linear-gradient(135deg, #522cd5 0%, #ff47b5 100%)'
+                    }}>
+                      <AlertCircle className="text-white" size={28} />
+                    </div>
+                    <div className="flex-1">
+                      <h2 className="text-2xl font-bold mb-1 flex items-center gap-2" style={{ color: '#ffffff' }}>
+                        ⚠️ Service Update
+                      </h2>
+                      <p className="text-sm" style={{ color: '#d1c4ff' }}>
+                        Important information about music playback
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setShowApiLimitModal(false)}
+                      className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all hover:opacity-80"
+                      style={{ background: '#2a2d43' }}
+                    >
+                      <X size={18} style={{ color: '#ffffff' }} />
+                    </button>
+                  </div>
+
+                  {/* Content */}
+                  <div className="space-y-4 mb-6">
+                    <div className="rounded-2xl p-4 border backdrop-blur-sm" style={{ 
+                      background: '#2a2d43',
+                      borderColor: '#522cd5'
+                    }}>
+                      <p className="leading-relaxed" style={{ color: '#ffffff' }}>
+                        Due to <span className="font-bold" style={{ color: '#ff47b5' }}>Spotify API limitations</span>, music playback is currently unavailable on this page.
+                      </p>
+                    </div>
+
+                    <div className="rounded-2xl p-4 border backdrop-blur-sm" style={{ 
+                      background: 'linear-gradient(135deg, #522cd5 0%, #ff47b5 100%)',
+                      opacity: 0.9,
+                      borderColor: '#ff47b5'
+                    }}>
+                      <p className="leading-relaxed" style={{ color: '#ffffff' }}>
+                        💡 <span className="font-semibold">Good news!</span> You can enjoy the full music streaming experience with unlimited playback on <span className="font-bold">VibeTube</span>.
+                      </p>
+                    </div>
+
+                    <p className="text-sm text-center" style={{ color: '#d1c4ff' }}>
+                      We're working hard to bring full Spotify integration back!
+                    </p>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setShowApiLimitModal(false)}
+                      className="flex-1 px-6 py-3.5 rounded-xl font-semibold transition-all duration-200 hover:opacity-80"
+                      style={{ 
+                        background: '#2a2d43',
+                        color: '#ffffff'
+                      }}
+                    >
+                      Stay Here
+                    </button>
+                    <button
+                      onClick={() => navigate('/vibe-tube')}
+                      className="flex-1 px-6 py-3.5 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-105"
+                      style={{ 
+                        background: '#ff3f81',
+                        color: '#ffffff'
+                      }}
+                    >
+                      <Youtube size={20} />
+                      <span>Go to VibeTube</span>
+                      <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
       {/* Audio Element */}
       <audio
         ref={audioRef}
@@ -312,6 +484,43 @@ const VibeZone = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
+            {/* API Limitation Banner */}
+            <div className="mb-6 rounded-2xl border overflow-hidden" style={{ 
+              background: '#0d0f21',
+              borderColor: '#522cd5'
+            }}>
+              <div className="flex flex-col md:flex-row items-start md:items-center gap-4 p-4">
+                <div className="flex items-start gap-3 flex-1">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 animate-pulse" style={{
+                    background: 'linear-gradient(135deg, #522cd5 0%, #ff47b5 100%)'
+                  }}>
+                    <AlertCircle className="text-white" size={20} />
+                  </div>
+                  <div>
+                    <h3 className="font-bold mb-1 flex items-center gap-2" style={{ color: '#ffffff' }}>
+                      ⚠️ Service Update
+                    </h3>
+                    <p className="text-sm leading-relaxed" style={{ color: '#d1c4ff' }}>
+                      Due to <span className="font-semibold" style={{ color: '#ff47b5' }}>Spotify API limitations</span>, music playback is currently unavailable. 
+                      Try <span className="font-semibold" style={{ color: '#ff47b5' }}>VibeTube</span> for full streaming experience!
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => navigate('/vibe-tube')}
+                  className="shrink-0 px-5 py-2.5 rounded-xl font-semibold transition-all duration-200 flex items-center gap-2 hover:scale-105 shadow-lg"
+                  style={{ 
+                    background: '#ff3f81',
+                    color: '#ffffff'
+                  }}
+                >
+                  <Youtube size={18} />
+                  <span>Go to VibeTube</span>
+                  <ArrowRight size={16} />
+                </button>
+              </div>
+            </div>
+
             <div className="flex items-center gap-4 mb-6">
               <div className="w-16 h-16 bg-gradient-to-br from-purple-500 via-pink-500 to-fuchsia-500 rounded-full flex items-center justify-center shadow-lg animate-pulse">
                 <Music2 size={32} className="text-white" />
@@ -410,7 +619,12 @@ const VibeZone = () => {
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: index * 0.05, duration: 0.3 }}
                     whileHover={{ scale: 1.03, y: -5 }}
-                    className="bg-white/10 backdrop-blur-lg hover:bg-white/15 rounded-2xl p-4 transition-all border border-white/10 hover:border-pink-500/50 hover:shadow-lg hover:shadow-pink-500/20 group"
+                    onClick={() => {
+                      if (track.external_urls?.spotify) {
+                        window.open(track.external_urls.spotify, '_blank', 'noopener,noreferrer');
+                      }
+                    }}
+                    className="bg-white/10 backdrop-blur-lg hover:bg-white/15 rounded-2xl p-4 transition-all border border-white/10 hover:border-pink-500/50 hover:shadow-lg hover:shadow-pink-500/20 group cursor-pointer"
                   >
                     {/* Album Cover */}
                     <div className="relative mb-4">
@@ -423,9 +637,17 @@ const VibeZone = () => {
                         />
                       </div>
                       
+                      {/* Spotify Badge - Click to Open */}
+                      <div className="absolute top-3 right-3 bg-green-500 p-1.5 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                        <ExternalLink size={14} className="text-white" />
+                      </div>
+                      
                       {/* Play Button Overlay */}
                       <button
-                        onClick={() => playTrack(track)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          playTrack(track);
+                        }}
                         disabled={!track.preview_url}
                         className={`absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center transition-opacity rounded-xl ${
                           track.preview_url 
@@ -480,7 +702,10 @@ const VibeZone = () => {
                     {/* Actions */}
                     <div className="flex items-center justify-between">
                       <button
-                        onClick={() => toggleFavorite(track)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleFavorite(track);
+                        }}
                         className="p-2 hover:bg-white/10 rounded-full transition-all"
                       >
                         <Heart
@@ -494,6 +719,7 @@ const VibeZone = () => {
                           href={track.external_urls.spotify}
                           target="_blank"
                           rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
                           className="p-2 hover:bg-white/10 rounded-full transition-all group/link"
                           title="Open in Spotify"
                         >
@@ -509,6 +735,31 @@ const VibeZone = () => {
                 );
               })}
             </motion.div>
+
+            {/* Loading More Indicator */}
+            {loadingMore && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex flex-col items-center justify-center py-8"
+              >
+                <div className="w-12 h-12 border-4 border-pink-500/30 border-t-pink-500 rounded-full animate-spin mb-3"></div>
+                <p className="text-gray-400 text-sm">Loading more tracks...</p>
+              </motion.div>
+            )}
+
+            {/* No More Tracks Indicator */}
+            {!hasMore && tracks.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-center py-8"
+              >
+                <p className="text-gray-400 text-sm">
+                  🎵 You've reached the end! All tracks loaded.
+                </p>
+              </motion.div>
+            )}
           </>
         ) : (
           <div className="text-center py-12">

@@ -292,10 +292,7 @@ const Footer = () => {
         <div className="flex flex-col md:flex-row justify-between items-center gap-6">
           {/* Copyright */}
           <div className="text-gray-500 text-sm">
-            © {currentYear} VMusic. All rights reserved. 
-            <span className="ml-2 text-gray-600">
-              Powered by <a href="https://www.jamendo.com" target="_blank" rel="noopener noreferrer" className="text-green-400 hover:text-green-300">Jamendo API</a>
-            </span>
+            © {currentYear} VMusic. All rights reserved.
           </div>
 
           {/* Social Links */}
@@ -319,18 +316,6 @@ const Footer = () => {
             })}
           </div>
         </div>
-
-        {/* Additional Info */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          className="mt-8 text-center"
-        >
-          <p className="text-xs text-gray-600">
-            Built with ❤️ using React, Vite, Tailwind CSS, and Framer Motion
-          </p>
-        </motion.div>
       </div>
     </footer>
   );

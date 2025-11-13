@@ -3,6 +3,7 @@ import { Navbar } from './components/layout';
 import ProtectedRoute from './components/ProtectedRoute';
 import FloatingPlayer from './components/player/FloatingPlayer';
 import Toast from './components/Toast';
+import ErrorBoundary from './components/ErrorBoundary';
 import Landing from './pages/Landing';
 import About from './pages/About';
 import TrackDetails from './pages/TrackDetails';
@@ -38,7 +39,11 @@ function App() {
           <Route path="/explore" element={<Explore />} />
           <Route path="/artists" element={<Artists />} />
           <Route path="/vibe-zone" element={<VibeZone />} />
-          <Route path="/vibe-tube" element={<VibeTube />} />
+          <Route path="/vibe-tube" element={
+            <ErrorBoundary>
+              <VibeTube />
+            </ErrorBoundary>
+          } />
           <Route path="/search" element={<Search />} />
           <Route path="/artist/:id" element={<Artist />} />
           <Route path="/album/:id" element={<Album />} />

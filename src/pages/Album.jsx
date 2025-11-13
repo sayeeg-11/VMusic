@@ -133,7 +133,7 @@ const Album = () => {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-900 to-black flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-16 h-16 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-400">Loading album...</p>
         </div>
       </div>
@@ -149,7 +149,7 @@ const Album = () => {
           <p className="text-gray-400 mb-6">The album you're looking for doesn't exist.</p>
           <button
             onClick={() => navigate(-1)}
-            className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+            className="px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-lg hover:from-cyan-700 hover:to-blue-700 transition-colors"
           >
             Go Back
           </button>
@@ -171,7 +171,7 @@ const Album = () => {
             transform: 'scale(1.1)',
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/70 to-gray-900" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/80 to-gray-900" />
         
         {/* Content */}
         <div className="relative h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-end pb-8">
@@ -189,7 +189,7 @@ const Album = () => {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center">
+                <div className="w-full h-full bg-gradient-to-br from-cyan-600 to-blue-600 flex items-center justify-center">
                   <Music2 size={64} className="text-white/50" />
                 </div>
               )}
@@ -210,8 +210,8 @@ const Album = () => {
                 Back
               </button>
               
-              <p className="text-sm text-gray-400 mb-2">ALBUM</p>
-              <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">
+              <p className="text-sm font-semibold text-cyan-400 tracking-wider mb-2">ALBUM</p>
+              <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 drop-shadow-lg">
                 {album.name}
               </h1>
               
@@ -246,7 +246,7 @@ const Album = () => {
         <div className="flex items-center gap-4">
           <button
             onClick={handlePlayAll}
-            className="px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-full flex items-center gap-2 transition-all shadow-lg hover:shadow-purple-500/50"
+            className="px-8 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white font-semibold rounded-full flex items-center gap-2 transition-all shadow-lg hover:shadow-cyan-500/50"
           >
             <Play size={20} fill="white" />
             Play All
@@ -304,7 +304,7 @@ const Album = () => {
                       >
                         <Play 
                           size={20} 
-                          className={isCurrentTrack && isPlaying ? 'text-purple-400' : 'text-white'}
+                          className={isCurrentTrack && isPlaying ? 'text-cyan-400' : 'text-white'}
                           fill={isCurrentTrack && isPlaying ? 'currentColor' : 'none'}
                         />
                       </button>
@@ -313,7 +313,7 @@ const Album = () => {
                     {/* Track Info */}
                     <div className="flex-1 min-w-0">
                       <h3 className={`font-medium truncate ${
-                        isCurrentTrack ? 'text-purple-400' : 'text-white'
+                        isCurrentTrack ? 'text-cyan-400' : 'text-white'
                       }`}>
                         {track.name}
                       </h3>

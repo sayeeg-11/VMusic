@@ -123,20 +123,6 @@ const Explore = () => {
   return (
     <section className="py-20 px-4 bg-gradient-to-b from-gray-900 to-black text-white">
       <div className="max-w-7xl mx-auto">
-        {/* Music Source Badge */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex justify-center mb-8"
-        >
-          <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500/20 to-green-500/20 backdrop-blur-lg rounded-full border border-purple-500/30">
-            <Sparkles className="text-yellow-400" size={20} />
-            <span className="text-sm font-semibold">
-              🎵 Jamendo Full Tracks + 🎧 Spotify Previews (30s)
-            </span>
-          </div>
-        </motion.div>
-
         {/* Popular Songs Section */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
