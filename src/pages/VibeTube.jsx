@@ -25,6 +25,16 @@ const YOUTUBE_API_BASE = 'https://www.googleapis.com/youtube/v3';
 const VibeTube = () => {
   const navigate = useNavigate();
   const { currentUser, googleAccessToken } = useAuth();
+  
+  // Debug: Log token status
+  useEffect(() => {
+    console.log('🔍 VibeTube Auth Status:', {
+      hasUser: !!currentUser,
+      userEmail: currentUser?.email,
+      hasToken: !!googleAccessToken,
+      tokenPreview: googleAccessToken ? `${googleAccessToken.substring(0, 20)}...` : 'null'
+    });
+  }, [currentUser, googleAccessToken]);
   const location = window.location;
   const urlParams = new URLSearchParams(location.search);
   const searchQueryFromUrl = urlParams.get('search');
@@ -681,7 +691,10 @@ const VibeTube = () => {
             isLoading={isLoading}
             onShowHistory={() => setShowSearchHistory(true)}
             showHistoryButton={!!currentUser}
-            onShowYouTubePlaylists={() => setShowYouTubePlaylists(true)}
+            onShowYouTubePlaylists={() => {
+              console.log('🎬 YouTube button clicked!');
+              setShowYouTubePlaylists(true);
+            }}
             showYouTubeButton={!!currentUser && !!googleAccessToken}
           />
         </div>

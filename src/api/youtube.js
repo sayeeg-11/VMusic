@@ -5,10 +5,9 @@
  * using user's Google OAuth access token.
  */
 
-// Auto-detect environment
-const isDevelopment = import.meta.env.DEV || window.location.hostname === 'localhost';
-// Use production API for now (local API requires Vercel CLI)
-const BASE_URL = 'https://v-music-gamma.vercel.app/api';
+// Get API base URL from environment variable
+// Default to production if not set
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://v-music-gamma.vercel.app/api';
 
 /**
  * YouTube API Client

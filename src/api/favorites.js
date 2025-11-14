@@ -1,5 +1,6 @@
-// Use production API for now (local API requires Vercel CLI setup)
-const API_BASE_URL = 'https://v-music-gamma.vercel.app/api';
+// Get API base URL from environment variable
+// Default to production if not set
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://v-music-gamma.vercel.app/api';
 
 export const favoritesAPI = {
   // Get user's favorites
