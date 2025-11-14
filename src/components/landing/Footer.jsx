@@ -15,7 +15,12 @@ const Footer = () => {
   const footerLinks = {
     product: [
       { name: 'Explore Music', href: '/explore' },
+      { name: 'VibeTube', href: '/vibetube' },
+      { name: 'Artists', href: '/artists' },
+      { name: 'Playlists', href: '/playlists' },
       { name: 'Search', href: '/search' },
+      { name: 'Favorites', href: '/favorites' },
+      { name: 'Profile', href: '/profile' },
       { name: 'About', href: '/about' },
     ],
     company: [
@@ -26,8 +31,11 @@ const Footer = () => {
       { name: 'Terms of Service', href: '/terms-of-service' },
     ],
     resources: [
-      { name: 'API Documentation', href: 'https://developer.jamendo.com', external: true },
-      { name: 'Jamendo Music', href: 'https://www.jamendo.com', external: true },
+      { name: 'Spotify API', href: 'https://developer.spotify.com', external: true },
+      { name: 'Google Cloud', href: 'https://console.cloud.google.com', external: true },
+      { name: 'Firebase', href: 'https://console.firebase.google.com', external: true },
+      { name: 'MongoDB Atlas', href: 'https://cloud.mongodb.com', external: true },
+      { name: 'Jamendo API', href: 'https://developer.jamendo.com', external: true },
     ],
   };
 
@@ -276,9 +284,20 @@ const Footer = () => {
                   whileHover={{ x: 5 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <a href={link.href} className="text-gray-400 hover:text-green-400 transition-colors">
-                    {link.name}
-                  </a>
+                  {link.external ? (
+                    <a 
+                      href={link.href} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-gray-400 hover:text-green-400 transition-colors"
+                    >
+                      {link.name}
+                    </a>
+                  ) : (
+                    <Link to={link.href} className="text-gray-400 hover:text-green-400 transition-colors">
+                      {link.name}
+                    </Link>
+                  )}
                 </motion.li>
               ))}
             </ul>
