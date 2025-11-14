@@ -29,7 +29,21 @@ const YouTubePlaylists = ({ isOpen, onClose, userId, accessToken, onPlayVideo })
       }
     } catch (err) {
       console.error('Error fetching playlists:', err);
-      setError(err.message || 'Failed to load playlists. Please sign in again.');
+      
+      // Show user-friendly error message with instructions
+      if (err.message.includes('quotas') || err.message.includes('denied')) {
+        setError(
+          'YouTube API is not available. To enable this feature:\n\n' +
+          '1. Go to Google Cloud Console\n' +
+          '2. Enable YouTube Data API v3\n' +
+          '3. Configure OAuth consent screen\n\n' +
+          'For now, you can still search and play videos directly!'
+        );
+      } else if (err.message.includes('token') || err.message.includes('sign in')) {
+        setError('Your session has expired. Please sign out and sign in with Google again.');
+      } else {
+        setError(err.message || 'Failed to load playlists. Please try again later.');
+      }
     } finally {
       setLoading(false);
     }
@@ -134,16 +148,29 @@ const YouTubePlaylists = ({ isOpen, onClose, userId, accessToken, onPlayVideo })
 
             {/* Error State */}
             {error && !loading && !loadingItems && (
-              <div className="flex flex-col items-center justify-center py-16">
+              <div className="flex flex-col items-center justify-center py-16 px-6">
                 <AlertCircle className="text-red-500 mb-4" size={48} />
-                <p className="text-gray-400 text-center">{error}</p>
-                {error.includes('sign in') && (
+                <p className="text-gray-300 text-center max-w-2xl whitespace-pre-line leading-relaxed">
+                  {error}
+                </p>
+                {(error.includes('sign in') || error.includes('expired')) && (
                   <button
                     onClick={onClose}
-                    className="mt-4 px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                    className="mt-6 px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
                   >
                     Close & Sign In Again
                   </button>
+                )}
+                {error.includes('Google Cloud Console') && (
+                  <div className="mt-6 text-center">
+                    <p className="text-sm text-gray-500 mb-3">Alternative: Search videos directly instead</p>
+                    <button
+                      onClick={onClose}
+                      className="px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
+                    >
+                      Close
+                    </button>
+                  </div>
                 )}
               </div>
             )}

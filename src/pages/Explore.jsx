@@ -82,7 +82,10 @@ const Explore = () => {
         setLikedTracks(new Set(likedTrackIds));
       }
     } catch (error) {
-      console.error('Error loading liked tracks:', error);
+      // Silently handle Firestore offline errors
+      if (error.code !== 'unavailable' && !error.message?.includes('offline')) {
+        console.error('Error loading liked tracks:', error);
+      }
     }
   };
 

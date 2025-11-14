@@ -28,30 +28,39 @@ const Favorites = () => {
       setLoading(true);
       
       // Load Jamendo favorites from Firestore
-      const userRef = doc(db, 'users', currentUser.uid);
-      const userSnap = await getDoc(userRef);
-      
-      if (userSnap.exists()) {
-        const userData = userSnap.data();
-        const likedTrackIds = userData.likedTracks || [];
-        setFavorites(likedTrackIds);
+      try {
+        const userRef = doc(db, 'users', currentUser.uid);
+        const userSnap = await getDoc(userRef);
         
-        // Load each liked track by ID
-        if (likedTrackIds.length > 0) {
-          const trackPromises = likedTrackIds.map(async (trackId) => {
-            try {
-              const trackData = await jamendoAPI.getTrackById(trackId);
-              return trackData.results?.[0];
-            } catch (error) {
-              console.error(`Error loading track ${trackId}:`, error);
-              return null;
-            }
-          });
+        if (userSnap.exists()) {
+          const userData = userSnap.data();
+          const likedTrackIds = userData.likedTracks || [];
+          setFavorites(likedTrackIds);
           
-          const loadedTracks = await Promise.all(trackPromises);
-          setTracks(loadedTracks.filter(track => track !== null));
+          // Load each liked track by ID
+          if (likedTrackIds.length > 0) {
+            const trackPromises = likedTrackIds.map(async (trackId) => {
+              try {
+                const trackData = await jamendoAPI.getTrackById(trackId);
+                return trackData.results?.[0];
+              } catch (error) {
+                console.error(`Error loading track ${trackId}:`, error);
+                return null;
+              }
+            });
+            
+            const loadedTracks = await Promise.all(trackPromises);
+            setTracks(loadedTracks.filter(track => track !== null));
+          } else {
+            setTracks([]);
+          }
+        }
+      } catch (firestoreError) {
+        // Silently handle Firestore offline errors
+        if (firestoreError.code === 'unavailable' || firestoreError.message?.includes('offline')) {
+          console.log('⚠️ Firestore offline - using cached data');
         } else {
-          setTracks([]);
+          console.error('Error loading Jamendo favorites:', firestoreError);
         }
       }
 

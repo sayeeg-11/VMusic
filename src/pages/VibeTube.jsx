@@ -829,7 +829,7 @@ const VibeTube = () => {
           onClose={() => setShowYouTubePlaylists(false)}
           userId={currentUser.uid}
           accessToken={googleAccessToken}
-          onPlayVideo={playVideo}
+          onPlayVideo={playVideoDirectly}
         />
       )}
 

@@ -270,7 +270,10 @@ const VibeZone = () => {
         setFavorites(userData.spotifyFavorites || []);
       }
     } catch (error) {
-      console.error('Error loading favorites:', error);
+      // Silently handle Firestore offline errors
+      if (error.code !== 'unavailable' && !error.message?.includes('offline')) {
+        console.error('Error loading favorites:', error);
+      }
     }
   };
 
