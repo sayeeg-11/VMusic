@@ -16,7 +16,9 @@ export const usersAPI = {
           email: userData.email,
           displayName: userData.displayName,
           photoURL: userData.photoURL,
-          provider: userData.providerData?.[0]?.providerId || 'email'
+          provider: userData.providerData?.[0]?.providerId || 'email',
+          googleAccessToken: userData.googleAccessToken || null,
+          googleRefreshToken: userData.googleRefreshToken || null
         })
       });
 

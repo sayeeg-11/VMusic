@@ -118,11 +118,18 @@ export const AuthProvider = ({ children }) => {
   const signInWithGoogle = async () => {
     const result = await signInWithPopup(auth, googleProvider);
     
+    console.log('🔍 Google Sign-In Result:', {
+      hasTokenResponse: !!result._tokenResponse,
+      hasOAuthAccessToken: !!result._tokenResponse?.oauthAccessToken,
+      tokenPreview: result._tokenResponse?.oauthAccessToken?.substring(0, 30)
+    });
+    
     // Get Google OAuth access token for YouTube API
     const credential = result._tokenResponse;
     if (credential?.oauthAccessToken) {
       setGoogleAccessToken(credential.oauthAccessToken);
       console.log('✅ Google access token obtained for YouTube API');
+      console.log('🎯 Token length:', credential.oauthAccessToken.length);
       
       // Store token in MongoDB for persistent access
       try {
@@ -138,6 +145,9 @@ export const AuthProvider = ({ children }) => {
       } catch (error) {
         console.error('Failed to save access token:', error);
       }
+    } else {
+      console.error('❌ No OAuth access token in response!');
+      console.error('Token response keys:', Object.keys(credential || {}));
     }
     
     await createUserDocument(result.user);
@@ -155,6 +165,19 @@ export const AuthProvider = ({ children }) => {
       try {
         if (user) {
           await createUserDocument(user);
+          
+          // Try to restore Google access token from MongoDB
+          try {
+            const userData = await usersAPI.getUser(user.uid);
+            if (userData?.googleAccessToken) {
+              setGoogleAccessToken(userData.googleAccessToken);
+              console.log('✅ Google access token restored from MongoDB');
+            }
+          } catch (error) {
+            console.error('Failed to restore access token:', error);
+          }
+        } else {
+          setGoogleAccessToken(null);
         }
         setCurrentUser(user);
       } catch (error) {

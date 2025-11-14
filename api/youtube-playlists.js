@@ -79,6 +79,9 @@ async function fetchUserPlaylists(accessToken) {
   url.searchParams.append('mine', 'true');
   url.searchParams.append('maxResults', '50');
 
+  console.log('🔍 Fetching YouTube playlists...');
+  console.log('Token preview:', accessToken.substring(0, 30) + '...');
+
   const response = await fetch(url.toString(), {
     headers: {
       'Authorization': `Bearer ${accessToken}`,
@@ -86,9 +89,19 @@ async function fetchUserPlaylists(accessToken) {
     }
   });
 
+  console.log('YouTube API Response Status:', response.status);
+
   if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`${response.status}: ${error}`);
+    const errorText = await response.text();
+    console.error('YouTube API Error Response:', errorText);
+    
+    try {
+      const errorJson = JSON.parse(errorText);
+      console.error('Error details:', errorJson);
+      throw new Error(`${response.status}: ${errorJson.error?.message || errorText}`);
+    } catch (e) {
+      throw new Error(`${response.status}: ${errorText}`);
+    }
   }
 
   const data = await response.json();
