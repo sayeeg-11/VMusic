@@ -8,6 +8,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { toast } from '../components/Toast';
 import { doc, getDoc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { db } from '../config/firebase';
+import { searchHistoryAPI } from '../api/users';
 
 const Search = () => {
   const { playTrack } = usePlayer();
@@ -70,8 +71,20 @@ const Search = () => {
     
     try {
       const data = await jamendoAPI.searchTracks(query, 30);
-      setTracks(data.results || []);
+      const results = data.results || [];
+      setTracks(results);
       setSearchParams({ q: query });
+
+      // Save search query to history if user is logged in
+      if (currentUser) {
+        try {
+          await searchHistoryAPI.addToHistory(currentUser.uid, query, results.length);
+          console.log('✅ Search query saved to history');
+        } catch (error) {
+          console.error('Failed to save search history:', error);
+          // Continue even if history save fails
+        }
+      }
     } catch (error) {
       console.error('Error searching tracks:', error);
       setTracks([]);

@@ -95,7 +95,23 @@ export const AuthProvider = ({ children }) => {
 
   // Sign in with email and password
   const signIn = async (email, password) => {
-    return signInWithEmailAndPassword(auth, email, password);
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    
+    // Sync user to MongoDB on sign in
+    try {
+      await usersAPI.syncUser(userCredential.user.uid, {
+        email: userCredential.user.email,
+        displayName: userCredential.user.displayName,
+        photoURL: userCredential.user.photoURL,
+        providerData: userCredential.user.providerData
+      });
+      console.log('✅ User synced to MongoDB on sign in');
+    } catch (mongoError) {
+      console.error('MongoDB sync error on sign in:', mongoError);
+      // Continue even if MongoDB sync fails
+    }
+    
+    return userCredential;
   };
 
   // Sign in with Google

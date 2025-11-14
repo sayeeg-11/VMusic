@@ -126,3 +126,134 @@ export const searchHistoryAPI = {
     }
   }
 };
+
+export const playlistsAPI = {
+  // Get user's playlists
+  async getPlaylists(userId) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/playlists?userId=${userId}`);
+      if (!response.ok) throw new Error('Failed to fetch playlists');
+      const data = await response.json();
+      return data.playlists || [];
+    } catch (error) {
+      console.error('Error fetching playlists:', error);
+      return [];
+    }
+  },
+
+  // Create new playlist
+  async createPlaylist(userId, name, tracks = [], source = 'vibetube') {
+    try {
+      const response = await fetch(`${API_BASE_URL}/playlists`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId,
+          name,
+          tracks,
+          source
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to create playlist');
+      const data = await response.json();
+      return data.playlist;
+    } catch (error) {
+      console.error('Error creating playlist:', error);
+      throw error;
+    }
+  },
+
+  // Update playlist
+  async updatePlaylist(playlistId, updates) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/playlists`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          playlistId,
+          ...updates
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to update playlist');
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error updating playlist:', error);
+      throw error;
+    }
+  },
+
+  // Add track to playlist
+  async addTrack(playlistId, track) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/playlists`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          playlistId,
+          addTrack: track
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to add track');
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error adding track:', error);
+      throw error;
+    }
+  },
+
+  // Remove track from playlist
+  async removeTrack(playlistId, trackId) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/playlists`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          playlistId,
+          removeTrackId: trackId
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to remove track');
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error removing track:', error);
+      throw error;
+    }
+  },
+
+  // Delete playlist
+  async deletePlaylist(playlistId) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/playlists`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          playlistId
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to delete playlist');
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error deleting playlist:', error);
+      throw error;
+    }
+  }
+};

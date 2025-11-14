@@ -557,6 +557,27 @@ const VibeTube = () => {
 
 
 
+  // Play video directly from search results (receives video object)
+  const playVideoDirectly = (video) => {
+    // Check if video is already in playlist
+    const existingIndex = playlist.findIndex(t => t.videoId === video.videoId);
+    
+    if (existingIndex >= 0) {
+      // Video exists in playlist, play it
+      playVideo(existingIndex);
+    } else {
+      // Add to playlist first, then play
+      setPlaylist(prev => [...prev, video]);
+      setCurrentTrack(video);
+      setCurrentIndex(playlist.length);
+      
+      if (playerRef.current && playerRef.current.loadVideoById) {
+        playerRef.current.loadVideoById(video.videoId);
+        playerRef.current.playVideo();
+      }
+    }
+  };
+
   const playVideo = (index) => {
     if (index < 0 || index >= playlist.length) return;
     
@@ -716,7 +737,7 @@ const VibeTube = () => {
               <SearchResults
                 results={searchResults}
                 onAdd={addToPlaylist}
-                onPlayNow={playVideo}
+                onPlayNow={playVideoDirectly}
                 onAddToFavorites={addToFavorites}
                 playlists={playlists}
                 isLoading={isLoading}

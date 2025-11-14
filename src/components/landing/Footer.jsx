@@ -18,9 +18,6 @@ const Footer = () => {
       { name: 'VibeTube', href: '/vibetube' },
       { name: 'Artists', href: '/artists' },
       { name: 'Playlists', href: '/playlists' },
-      { name: 'Search', href: '/search' },
-      { name: 'Favorites', href: '/favorites' },
-      { name: 'Profile', href: '/profile' },
       { name: 'About', href: '/about' },
     ],
     company: [

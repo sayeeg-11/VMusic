@@ -1,18 +1,21 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Heart, Play, Trash2, Music2, ListPlus } from 'lucide-react';
+import { Heart, Play, Trash2, Music2, ListPlus, Youtube } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { usePlayer } from '../contexts/PlayerContext';
 import { doc, getDoc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import jamendoAPI from '../api/jamendo';
+import { favoritesAPI } from '../api/favorites';
 
 const Favorites = () => {
   const { currentUser } = useAuth();
   const { playTrack } = usePlayer();
   const [favorites, setFavorites] = useState([]);
   const [tracks, setTracks] = useState([]);
+  const [youtubeFavorites, setYoutubeFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('jamendo'); // 'jamendo' or 'youtube'
 
   useEffect(() => {
     if (currentUser) {
@@ -23,6 +26,8 @@ const Favorites = () => {
   const loadFavorites = async () => {
     try {
       setLoading(true);
+      
+      // Load Jamendo favorites from Firestore
       const userRef = doc(db, 'users', currentUser.uid);
       const userSnap = await getDoc(userRef);
       
@@ -44,11 +49,19 @@ const Favorites = () => {
           });
           
           const loadedTracks = await Promise.all(trackPromises);
-          // Filter out any null values (failed loads)
           setTracks(loadedTracks.filter(track => track !== null));
         } else {
           setTracks([]);
         }
+      }
+
+      // Load YouTube favorites from MongoDB
+      try {
+        const ytFavorites = await favoritesAPI.getFavorites(currentUser.uid);
+        setYoutubeFavorites(ytFavorites);
+        console.log('✅ Loaded YouTube favorites:', ytFavorites.length);
+      } catch (error) {
+        console.error('Failed to load YouTube favorites:', error);
       }
     } catch (error) {
       console.error('Error loading favorites:', error);
@@ -71,7 +84,17 @@ const Favorites = () => {
     }
   };
 
-  const displayedTracks = tracks;
+  const removeYoutubeFavorite = async (videoId) => {
+    try {
+      await favoritesAPI.removeFromFavorites(currentUser.uid, videoId);
+      setYoutubeFavorites(prev => prev.filter(track => track.videoId !== videoId));
+      console.log('✅ Removed YouTube favorite');
+    } catch (error) {
+      console.error('Error removing YouTube favorite:', error);
+    }
+  };
+
+  const displayedTracks = activeTab === 'jamendo' ? tracks : youtubeFavorites;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-900 to-black pb-20">
@@ -97,6 +120,32 @@ const Favorites = () => {
                   {displayedTracks.length} track{displayedTracks.length !== 1 ? 's' : ''}
                 </p>
               </div>
+            </div>
+            
+            {/* Tabs */}
+            <div className="flex gap-2 mt-6">
+              <button
+                onClick={() => setActiveTab('jamendo')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+                  activeTab === 'jamendo'
+                    ? 'bg-pink-600 text-white'
+                    : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                }`}
+              >
+                <Music2 size={18} />
+                Jamendo ({tracks.length})
+              </button>
+              <button
+                onClick={() => setActiveTab('youtube')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+                  activeTab === 'youtube'
+                    ? 'bg-red-600 text-white'
+                    : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                }`}
+              >
+                <Youtube size={18} />
+                YouTube ({youtubeFavorites.length})
+              </button>
             </div>
           </motion.div>
         </div>
@@ -124,64 +173,80 @@ const Favorites = () => {
             transition={{ duration: 0.5 }}
             className="space-y-3"
           >
-            {displayedTracks.map((track, index) => (
-              <motion.div
-                key={track.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.05 }}
-                className="group bg-white/5 hover:bg-white/10 rounded-xl p-4 transition-all border border-white/10 hover:border-white/20"
-              >
-                <div className="flex items-center gap-4">
-                  {/* Album Art */}
-                  <div className="relative w-16 h-16 flex-shrink-0">
-                    <img
-                      src={track.image || 'https://via.placeholder.com/100'}
-                      alt={track.name}
-                      className="w-full h-full object-cover rounded-lg"
-                    />
-                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg">
-                      <button 
-                        onClick={() => playTrack(track, displayedTracks)}
-                        className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center hover:bg-green-600 hover:scale-110 transition-all"
+            {displayedTracks.map((track, index) => {
+              const isYouTube = activeTab === 'youtube';
+              const trackId = isYouTube ? track.videoId : track.id;
+              const trackName = isYouTube ? track.title : track.name;
+              const artistName = isYouTube ? track.channelTitle : track.artist_name;
+              const trackImage = isYouTube ? track.thumbnail : (track.image || 'https://via.placeholder.com/100');
+              const trackDuration = track.duration || 0;
+              
+              return (
+                <motion.div
+                  key={trackId}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.05 }}
+                  className="group bg-white/5 hover:bg-white/10 rounded-xl p-4 transition-all border border-white/10 hover:border-white/20"
+                >
+                  <div className="flex items-center gap-4">
+                    {/* Album Art */}
+                    <div className="relative w-16 h-16 flex-shrink-0">
+                      <img
+                        src={trackImage}
+                        alt={trackName}
+                        className="w-full h-full object-cover rounded-lg"
+                      />
+                      {!isYouTube && (
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg">
+                          <button 
+                            onClick={() => playTrack(track, displayedTracks)}
+                            className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center hover:bg-green-600 hover:scale-110 transition-all"
+                          >
+                            <Play size={16} className="text-white ml-0.5" fill="white" />
+                          </button>
+                        </div>
+                      )}
+                      {isYouTube && (
+                        <div className="absolute top-1 right-1">
+                          <Youtube size={14} className="text-red-500" />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Track Info */}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-white font-semibold truncate group-hover:text-green-400 transition-colors">
+                        {trackName}
+                      </h3>
+                      <p className="text-gray-400 text-sm truncate">{artistName}</p>
+                    </div>
+
+                    {/* Duration */}
+                    <div className="hidden sm:block text-gray-400 text-sm">
+                      {isYouTube ? trackDuration : jamendoAPI.formatDuration(trackDuration)}
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => isYouTube ? removeYoutubeFavorite(trackId) : removeFavorite(trackId)}
+                        className="p-2 text-pink-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
+                        title="Remove from favorites"
                       >
-                        <Play size={16} className="text-white ml-0.5" fill="white" />
+                        <Trash2 size={18} />
+                      </button>
+                      <button
+                        className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-all"
+                        title="Add to playlist"
+                      >
+                        <ListPlus size={18} />
                       </button>
                     </div>
                   </div>
-
-                  {/* Track Info */}
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-white font-semibold truncate group-hover:text-green-400 transition-colors">
-                      {track.name}
-                    </h3>
-                    <p className="text-gray-400 text-sm truncate">{track.artist_name}</p>
-                  </div>
-
-                  {/* Duration */}
-                  <div className="hidden sm:block text-gray-400 text-sm">
-                    {jamendoAPI.formatDuration(track.duration)}
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => removeFavorite(track.id)}
-                      className="p-2 text-pink-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
-                      title="Remove from favorites"
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                    <button
-                      className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-all"
-                      title="Add to playlist"
-                    >
-                      <ListPlus size={18} />
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              );
+            })}
           </motion.div>
         ) : (
           // Empty State
