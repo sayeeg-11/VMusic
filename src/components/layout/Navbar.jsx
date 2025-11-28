@@ -61,7 +61,6 @@ const Navbar = () => {
     { name: 'Artists', path: '/artists', icon: Users },
     { name: 'Vibe Zone', path: '/vibe-zone', icon: Sparkles },
     { name: 'VibeTube', path: '/vibe-tube', icon: Youtube },
-    { name: 'Favorites', path: '/favorites', icon: Heart },
   ];
 
   const navLinks = currentUser ? userLinks : guestLinks;

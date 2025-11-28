@@ -1,4 +1,4 @@
-import { MongoClient } from 'mongodb';
+import { MongoClient, ObjectId } from 'mongodb';
 
 // MongoDB connection
 const uri = process.env.MONGODB_URI;
@@ -99,7 +99,7 @@ export default async function handler(req, res) {
       // Add a single track to playlist
       if (addTrack) {
         await playlistsCollection.updateOne(
-          { _id: { $oid: playlistId } },
+          { _id: new ObjectId(playlistId) },
           {
             $push: { tracks: addTrack },
             $set: { updatedAt: new Date().toISOString() }
@@ -115,7 +115,7 @@ export default async function handler(req, res) {
       // Remove a track from playlist
       if (removeTrackId) {
         await playlistsCollection.updateOne(
-          { _id: { $oid: playlistId } },
+          { _id: new ObjectId(playlistId) },
           {
             $pull: { tracks: { id: removeTrackId } },
             $set: { updatedAt: new Date().toISOString() }
@@ -130,7 +130,7 @@ export default async function handler(req, res) {
 
       // Update playlist
       await playlistsCollection.updateOne(
-        { _id: { $oid: playlistId } },
+        { _id: new ObjectId(playlistId) },
         { $set: updateFields }
       );
 
@@ -148,7 +148,7 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Playlist ID is required' });
       }
 
-      await playlistsCollection.deleteOne({ _id: { $oid: playlistId } });
+      await playlistsCollection.deleteOne({ _id: new ObjectId(playlistId) });
 
       return res.status(200).json({
         message: 'Playlist deleted',

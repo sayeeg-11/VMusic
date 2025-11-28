@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   List,
@@ -9,7 +10,9 @@ import {
   Edit2,
   Trash2,
   Play,
-  GripVertical
+  GripVertical,
+  Heart,
+  ExternalLink
 } from 'lucide-react';
 
 // Component: PlaylistManager
@@ -21,6 +24,7 @@ const PlaylistManager = ({
   currentPlaylistId,
   onSelectPlaylist,
 }) => {
+  const navigate = useNavigate();
   const [isCreating, setIsCreating] = useState(false);
   const [newPlaylistName, setNewPlaylistName] = useState('');
   const [editingId, setEditingId] = useState(null);
@@ -56,6 +60,31 @@ const PlaylistManager = ({
         >
           <FolderPlus size={18} />
           <span className="text-sm font-medium">New</span>
+        </button>
+      </div>
+
+      {/* Quick Action Cards */}
+      <div className="grid grid-cols-2 gap-3 mb-4">
+        {/* View All Playlists */}
+        <button
+          onClick={() => navigate('/playlists')}
+          className="flex flex-col items-center justify-center gap-2 p-4 bg-gradient-to-br from-purple-600/20 to-indigo-600/20 hover:from-purple-600/30 hover:to-indigo-600/30 rounded-xl border border-purple-400/30 hover:border-purple-400/50 transition-all group"
+        >
+          <div className="w-10 h-10 bg-purple-500/20 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+            <List size={20} className="text-purple-400" />
+          </div>
+          <span className="text-xs font-semibold text-purple-200">View All</span>
+        </button>
+
+        {/* Liked Songs */}
+        <button
+          onClick={() => navigate('/favorites')}
+          className="flex flex-col items-center justify-center gap-2 p-4 bg-gradient-to-br from-red-600/20 to-pink-600/20 hover:from-red-600/30 hover:to-pink-600/30 rounded-xl border border-red-400/30 hover:border-red-400/50 transition-all group"
+        >
+          <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+            <Heart size={20} className="text-red-400" />
+          </div>
+          <span className="text-xs font-semibold text-red-200">Liked Songs</span>
         </button>
       </div>
 

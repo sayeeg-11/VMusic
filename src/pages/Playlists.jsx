@@ -151,58 +151,107 @@ const Playlists = () => {
                   key={playlist._id}
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.3, delay: index * 0.05 }}
-                  className="group bg-white/5 hover:bg-white/10 rounded-xl p-4 transition-all border border-white/10 hover:border-red-500/50"
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ type: "spring", stiffness: 200, delay: index * 0.05 }}
+                  className="group relative bg-gradient-to-b from-[#1b0c2d] to-[#090e16] rounded-2xl p-4 border border-pink-500/20 hover:border-pink-500/60 shadow-lg hover:shadow-pink-500/30 backdrop-blur-lg overflow-hidden"
                 >
-                  {/* Playlist Cover */}
-                  <div className="relative mb-4 overflow-hidden rounded-lg aspect-square">
+                  {/* Thumbnail Container with Blur Background */}
+                  <div className="relative h-44 rounded-xl overflow-hidden mb-4">
+                    {/* Background Thumbnail - Blurred */}
                     {playlist.tracks && playlist.tracks[0]?.thumbnail ? (
-                      <img 
-                        src={playlist.tracks[0].thumbnail} 
-                        alt={playlist.name}
-                        className="w-full h-full object-cover"
-                      />
+                      <>
+                        <img 
+                          src={playlist.tracks[0].thumbnail} 
+                          alt={playlist.name}
+                          className="absolute inset-0 w-full h-full object-cover scale-110 blur-sm opacity-40"
+                        />
+                        {/* Main Thumbnail - Sharp */}
+                        <img 
+                          src={playlist.tracks[0].thumbnail} 
+                          alt={playlist.name}
+                          className="relative w-full h-full object-cover scale-110 group-hover:scale-100 transition-all duration-500 opacity-80"
+                        />
+                      </>
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-red-600/20 to-pink-600/20 flex items-center justify-center">
-                        <Youtube size={64} className="text-red-400" />
+                        <Youtube size={64} className="text-red-400 opacity-50" />
                       </div>
                     )}
-                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <button 
-                        onClick={() => {
-                          if (playlist.tracks && playlist.tracks.length > 0) {
-                            // Navigate to VibeTube with the video from this playlist
-                            const track = playlist.tracks[0];
-                            navigate('/vibetube', {
-                              state: {
-                                autoPlayVideo: {
-                                  videoId: track.videoId,
-                                  title: track.title,
-                                  channelTitle: track.artist || track.channelTitle,
-                                  thumbnail: track.thumbnail
-                                }
+                    
+                    {/* Dark Overlay */}
+                    <div className="absolute inset-0 bg-black/50 group-hover:bg-black/40 transition-all duration-300" />
+                    
+                    {/* Center Play Button */}
+                    <button 
+                      onClick={() => {
+                        if (playlist.tracks && playlist.tracks.length > 0) {
+                          const track = playlist.tracks[0];
+                          navigate('/vibetube', {
+                            state: {
+                              autoPlayVideo: {
+                                videoId: track.videoId,
+                                title: track.title,
+                                channelTitle: track.artist || track.channelTitle,
+                                thumbnail: track.thumbnail
                               }
-                            });
+                            }
+                          });
+                        }
+                      }}
+                      className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-pink-600 hover:bg-pink-500 rounded-full flex items-center justify-center shadow-lg group-hover:shadow-pink-500/50 transition-all duration-300 opacity-0 group-hover:opacity-100 hover:scale-110"
+                      title="Play All"
+                    >
+                      <Play size={24} className="text-white ml-1" fill="white" />
+                    </button>
+                    
+                    {/* Delete Button - Top Right */}
+                    <button 
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        if (window.confirm(`Delete "${playlist.name}"? This cannot be undone.`)) {
+                          try {
+                            await playlistsAPI.deletePlaylist(playlist._id);
+                            loadMongoPlaylists();
+                          } catch (error) {
+                            console.error('Error deleting playlist:', error);
+                            alert('Failed to delete playlist');
                           }
-                        }}
-                        className="w-14 h-14 bg-red-500 rounded-full flex items-center justify-center hover:bg-red-600 hover:scale-110 transition-all shadow-lg"
-                      >
-                        <Play size={24} className="text-white ml-1" fill="white" />
-                      </button>
+                        }
+                      }}
+                      className="absolute top-3 right-3 w-10 h-10 bg-black/60 hover:bg-black/80 backdrop-blur-sm rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 hover:scale-110 hover:rotate-12 transition-all duration-300"
+                      title="Delete playlist"
+                    >
+                      <Trash2 size={18} className="text-white" />
+                    </button>
+
+                    {/* YouTube Badge - Bottom Left */}
+                    <div className="absolute bottom-3 left-3 bg-red-600/90 backdrop-blur-sm px-2.5 py-1 rounded-full flex items-center gap-1.5 shadow-lg">
+                      <Youtube size={14} className="text-white" />
+                      <span className="text-white text-xs font-semibold">YouTube</span>
+                    </div>
+
+                    {/* Track Count Badge - Bottom Right */}
+                    <div className="absolute bottom-3 right-3 bg-black/70 backdrop-blur-sm px-2.5 py-1 rounded-full">
+                      <span className="text-white text-xs font-medium">
+                        {playlist.tracks?.length || 0} tracks
+                      </span>
                     </div>
                   </div>
 
                   {/* Playlist Info */}
-                  <h3 className="text-white font-semibold mb-1 truncate group-hover:text-red-400 transition-colors">
-                    {playlist.name}
-                  </h3>
-                  <p className="text-gray-400 text-sm mb-2">
-                    {playlist.tracks?.length || 0} track{playlist.tracks?.length !== 1 ? 's' : ''}
-                  </p>
-                  <p className="text-red-400 text-xs flex items-center gap-1">
-                    <Youtube size={12} />
-                    YouTube
-                  </p>
+                  <div className="space-y-1.5">
+                    <h3 className="text-lg font-bold bg-gradient-to-r from-pink-400 via-red-400 to-orange-400 bg-clip-text text-transparent group-hover:from-pink-300 group-hover:to-red-300 transition-all truncate">
+                      {playlist.name}
+                    </h3>
+                    <p className="text-gray-400 text-sm flex items-center gap-1.5">
+                      <Music2 size={14} className="text-pink-400" />
+                      Imported from YouTube
+                    </p>
+                  </div>
+
+                  {/* Subtle Glow Effect */}
+                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-pink-500/0 via-pink-500/0 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
                 </motion.div>
               ))}
             </div>

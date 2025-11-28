@@ -121,7 +121,9 @@ export const playlistsAPI = {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to delete playlist');
+        const error = await response.json();
+        console.error('Delete API error:', error);
+        throw new Error(error.error || 'Failed to delete playlist');
       }
 
       return await response.json();
