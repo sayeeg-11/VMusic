@@ -11,8 +11,8 @@ Your VMusic app already has YouTube playlist import functionality implemented! T
 **Your OAuth credentials are from a different Google Cloud project than your Firebase config:**
 
 - **OAuth Credentials Project**: `vmusic-478107`
-  - Client ID: `775332798459-jrid2n0po6egl2h7nckab9pv7t8ficn5.apps.googleusercontent.com`
-  - Client Secret: `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`
+  - Client ID: `775332798459-******************************.apps.googleusercontent.com`
+  - Client Secret: `GOCSPX-****************************`
 
 - **Firebase Project**: `vmusic-7806a`
 
