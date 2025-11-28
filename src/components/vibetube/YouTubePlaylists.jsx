@@ -39,7 +39,12 @@ const YouTubePlaylists = ({ isOpen, onClose, userId, accessToken, onPlayVideo })
       console.error('Error fetching playlists:', err);
       
       // Show user-friendly error message with instructions
-      if (err.message.includes('quotas') || err.message.includes('denied')) {
+      if (err.message.includes('expired') || err.message.includes('TOKEN_EXPIRED')) {
+        setError(
+          '⏰ Your Google sign-in session has expired (tokens last 1 hour).\n\n' +
+          'Please sign out and sign in with Google again to get a fresh token.'
+        );
+      } else if (err.message.includes('quotas') || err.message.includes('denied')) {
         setError(
           'YouTube API is not available. To enable this feature:\n\n' +
           '1. Go to Google Cloud Console\n' +
