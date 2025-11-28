@@ -114,11 +114,21 @@ const VibeTube = () => {
 
   // Keyboard shortcuts
   useEffect(() => {
+    let lastKeyPressTime = 0;
+    const KEY_DEBOUNCE_MS = 200; // Prevent key spam
+
     const handleKeyPress = (e) => {
       // Don't trigger shortcuts if user is typing in an input field
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
         return;
       }
+
+      // Debounce key presses
+      const now = Date.now();
+      if (now - lastKeyPressTime < KEY_DEBOUNCE_MS) {
+        return;
+      }
+      lastKeyPressTime = now;
 
       switch (e.key.toLowerCase()) {
         case ' ': // Space - Play/Pause
@@ -279,16 +289,45 @@ const VibeTube = () => {
     }
   };
 
-  // Handle Video End
-  const handleVideoEnd = () => {
+  // Handle Video End - using useCallback to capture latest state
+  const handleVideoEnd = useCallback(() => {
+    // Get current playlist tracks
+    const currentPlaylist = playlists.find(p => p.id === currentPlaylistId) || playlists[0];
+    const currentTracks = currentPlaylist?.tracks || [];
+    
+    console.log('🎵 Video ended. Repeat:', isRepeat, 'Shuffle:', isShuffle, 'Playlist length:', currentTracks.length, 'Current index:', currentIndex);
+    
     if (isRepeat) {
       console.log('🔁 Repeat is ON - Replaying current video');
-      playerRef.current?.playVideo();
+      if (playerRef.current && playerRef.current.playVideo) {
+        playerRef.current.playVideo();
+      }
+    } else if (currentTracks.length > 0 && currentIndex !== -1) {
+      console.log('⏭️ Playing next video');
+      
+      // Calculate next index
+      let nextIndex;
+      if (isShuffle) {
+        nextIndex = Math.floor(Math.random() * currentTracks.length);
+        console.log(`🔀 Shuffle is ON - Playing random track #${nextIndex}`);
+      } else {
+        nextIndex = (currentIndex + 1) % currentTracks.length;
+        console.log(`⏭️ Shuffle is OFF - Playing next track #${nextIndex}`);
+      }
+      
+      // Play the next video
+      const nextVideo = currentTracks[nextIndex];
+      if (nextVideo && playerRef.current && playerRef.current.loadVideoById) {
+        setCurrentIndex(nextIndex);
+        setCurrentTrack(nextVideo);
+        playerRef.current.loadVideoById(nextVideo.videoId);
+        playerRef.current.playVideo();
+      }
     } else {
-      console.log('⏭️ Repeat is OFF - Playing next video');
-      handleNext();
+      console.log('⏸️ No more tracks to play');
+      setIsPlaying(false);
     }
-  };
+  }, [isRepeat, isShuffle, playlists, currentPlaylistId, currentIndex]);
 
   // Parse ISO 8601 duration to readable format
   const parseDuration = (isoDuration) => {
@@ -665,24 +704,35 @@ const VibeTube = () => {
       
       // Ensure player is ready before playing (with max retries)
       let retryCount = 0;
-      const maxRetries = 10;
+      const maxRetries = 15;
       
       const attemptPlay = () => {
-        if (playerRef.current && typeof playerRef.current.loadVideoById === 'function') {
-          console.log('▶️ Loading video ID:', video.videoId);
-          playerRef.current.loadVideoById(video.videoId);
-          playerRef.current.playVideo();
-          setIsPlaying(true);
+        // Check if YT API is loaded and player is initialized
+        if (window.YT && window.YT.Player && playerRef.current && typeof playerRef.current.loadVideoById === 'function') {
+          try {
+            console.log('▶️ Loading video ID:', video.videoId);
+            playerRef.current.loadVideoById(video.videoId);
+            playerRef.current.playVideo();
+            setIsPlaying(true);
+          } catch (error) {
+            console.error('❌ Error loading video:', error);
+          }
         } else if (retryCount < maxRetries) {
           retryCount++;
           console.warn(`⏳ Player not ready, retry ${retryCount}/${maxRetries}...`);
-          setTimeout(attemptPlay, 300);
+          setTimeout(attemptPlay, 500); // Increased delay
         } else {
           console.error('❌ Player failed to initialize after', maxRetries, 'attempts');
+          console.error('Debug info:', {
+            hasYT: !!window.YT,
+            hasYTPlayer: !!(window.YT && window.YT.Player),
+            hasPlayerRef: !!playerRef.current,
+            hasLoadMethod: !!(playerRef.current && typeof playerRef.current.loadVideoById === 'function')
+          });
         }
       };
       
-      setTimeout(attemptPlay, 100);
+      setTimeout(attemptPlay, 200);
     }
   };
 
