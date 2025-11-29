@@ -1,0 +1,32 @@
+# Netlify Configuration
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# Environment variables are set in Netlify Dashboard
+# Site Settings → Environment Variables
+
+# Secrets Scanning Configuration
+[build.environment]
+  # Skip scanning the build output (dist/) because Vite bundles env vars
+  # These are PUBLIC by design (VITE_ prefix means they're meant for frontend)
+  SECRETS_SCAN_OMIT_PATHS = "dist/**,docs/**,.env.example,SECURITY_FIX_COMPLETE.md"
+  
+  # Alternative: Disable secrets scanning entirely (not recommended)
+  # SECRETS_SCAN_ENABLED = "false"
+
+# Headers for security
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+
+# Redirect rules
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

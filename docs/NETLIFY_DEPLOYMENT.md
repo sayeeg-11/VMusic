@@ -72,42 +72,42 @@ Add these variables with your **REAL** values:
 
 #### Jamendo API
 ```
-VITE_JAMENDO_CLIENT_ID = 83bfb626
+VITE_JAMENDO_CLIENT_ID = your_jamendo_client_id_here
 ```
 
 #### Spotify API
 ```
-VITE_SPOTIFY_CLIENT_ID = 375b56d194264fd18ddc1e4151bb6c48
+VITE_SPOTIFY_CLIENT_ID = your_spotify_client_id_here
 VITE_SPOTIFY_REDIRECT_URI = https://your-site.netlify.app/callback
 ```
 ⚠️ Replace `your-site` with your actual Netlify site name
 
 #### YouTube API
 ```
-VITE_YOUTUBE_API_KEY = AIzaSyDQ4i49eBhNllyOkRh-0DyOWmkxnGGPojc
+VITE_YOUTUBE_API_KEY = your_youtube_api_key_here
 ```
 
 #### Firebase Configuration
 ```
-VITE_FIREBASE_API_KEY = AIzaSyAxRVuhduqnfQF9Vb-Oz7PROv2Vb4zwj9U
-VITE_FIREBASE_AUTH_DOMAIN = vmusic-7806a.firebaseapp.com
-VITE_FIREBASE_PROJECT_ID = vmusic-7806a
-VITE_FIREBASE_STORAGE_BUCKET = vmusic-7806a.firebasestorage.app
-VITE_FIREBASE_MESSAGING_SENDER_ID = 744562805154
-VITE_FIREBASE_APP_ID = 1:744562805154:web:b648e940fe59c5593b4afb
-VITE_FIREBASE_MEASUREMENT_ID = G-W9H7B4JZY0
+VITE_FIREBASE_API_KEY = your_firebase_api_key_here
+VITE_FIREBASE_AUTH_DOMAIN = your-project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID = your-project-id
+VITE_FIREBASE_STORAGE_BUCKET = your-project.firebasestorage.app
+VITE_FIREBASE_MESSAGING_SENDER_ID = your_sender_id_here
+VITE_FIREBASE_APP_ID = your_app_id_here
+VITE_FIREBASE_MEASUREMENT_ID = your_measurement_id_here
 ```
 
 #### EmailJS Configuration
 ```
-VITE_EMAILJS_USER_ID = vcfvtcxuQfUbBL4ze
-VITE_EMAILJS_SERVICE_ID = service_ef4l8lb
-VITE_EMAILJS_TEMPLATE_ID = template_0evqhzo
+VITE_EMAILJS_USER_ID = your_emailjs_user_id_here
+VITE_EMAILJS_SERVICE_ID = your_emailjs_service_id_here
+VITE_EMAILJS_TEMPLATE_ID = your_emailjs_template_id_here
 ```
 
 #### Backend API URL
 ```
-VITE_API_BASE_URL = https://v-music-gamma.vercel.app/api
+VITE_API_BASE_URL = https://your-backend-api.vercel.app/api
 ```
 
 ### Step 3: Update OAuth Redirect URIs
