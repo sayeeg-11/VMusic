@@ -51,8 +51,8 @@ const Navbar = () => {
   const guestLinks = [
     { name: 'Explore', path: '/explore', icon: Compass },
     { name: 'Artists', path: '/artists', icon: Users },
-    { name: 'Vibe Zone', path: '/vibe-zone', icon: Sparkles },
-    { name: 'VibeTube', path: '/vibe-tube', icon: Youtube },
+    { name: 'Vibe Zone', path: '/vibe-zone', icon: Disc3 },
+    { name: 'VibeTube', path: '/vibetube', icon: Youtube },
   ];
 
   const userLinks = [
@@ -60,7 +60,7 @@ const Navbar = () => {
     { name: 'Explore', path: '/explore', icon: Compass },
     { name: 'Artists', path: '/artists', icon: Users },
     { name: 'Vibe Zone', path: '/vibe-zone', icon: Sparkles },
-    { name: 'VibeTube', path: '/vibe-tube', icon: Youtube },
+    { name: 'VibeTube', path: '/vibetube', icon: Youtube },
   ];
 
   const navLinks = currentUser ? userLinks : guestLinks;

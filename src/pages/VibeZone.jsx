@@ -452,7 +452,7 @@ const VibeZone = () => {
                       Stay Here
                     </button>
                     <button
-                      onClick={() => navigate('/vibe-tube')}
+                      onClick={() => navigate('/vibetube')}
                       className="flex-1 px-6 py-3.5 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-105"
                       style={{ 
                         background: '#ff3f81',
@@ -510,7 +510,7 @@ const VibeZone = () => {
                   </div>
                 </div>
                 <button
-                  onClick={() => navigate('/vibe-tube')}
+                  onClick={() => navigate('/vibetube')}
                   className="shrink-0 px-5 py-2.5 rounded-xl font-semibold transition-all duration-200 flex items-center gap-2 hover:scale-105 shadow-lg"
                   style={{ 
                     background: '#ff3f81',

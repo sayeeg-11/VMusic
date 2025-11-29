@@ -220,7 +220,7 @@ const Search = () => {
               {/* VibeTube Search Button */}
               {searchQuery.trim() && (
                 <button
-                  onClick={() => navigate(`/vibe-tube?search=${encodeURIComponent(searchQuery)}`)}
+                  onClick={() => navigate(`/vibetube?search=${encodeURIComponent(searchQuery)}`)}
                   className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold rounded-full transition-all shadow-lg hover:shadow-red-500/50"
                 >
                   <Youtube size={20} />
