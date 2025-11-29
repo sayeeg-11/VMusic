@@ -1,5 +1,9 @@
 const BASE_URL = 'https://api.jamendo.com/v3.0';
-const CLIENT_ID = import.meta.env.VITE_JAMENDO_CLIENT_ID || '83bfb626';
+const CLIENT_ID = import.meta.env.VITE_JAMENDO_CLIENT_ID;
+
+if (!CLIENT_ID) {
+  console.error('VITE_JAMENDO_CLIENT_ID not found in environment variables');
+}
 
 /**
  * Jamendo API Service
