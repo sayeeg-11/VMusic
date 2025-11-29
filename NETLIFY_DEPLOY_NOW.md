@@ -21,6 +21,7 @@ git push origin main
 
 The new `netlify.toml` file tells Netlify to **skip scanning** these paths:
 - `dist/**` - Your build output (contains bundled env vars by design)
+- `src/**` - Source code (contains fallback URLs for development)
 - `docs/**` - Documentation files (now cleaned, but excluded for safety)
 - `.env.example` - Example environment file
 - `SECURITY_FIX_COMPLETE.md` - This summary document

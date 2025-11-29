@@ -8,9 +8,11 @@
 
 # Secrets Scanning Configuration
 [build.environment]
-  # Skip scanning the build output (dist/) because Vite bundles env vars
-  # These are PUBLIC by design (VITE_ prefix means they're meant for frontend)
-  SECRETS_SCAN_OMIT_PATHS = "dist/**,docs/**,.env.example,SECURITY_FIX_COMPLETE.md"
+  # Skip scanning source code and build output
+  # - dist/: Vite bundles VITE_* env vars (public by design)
+  # - src/: Contains fallback URLs for local development
+  # - docs/: Documentation with example configurations
+  SECRETS_SCAN_OMIT_PATHS = "dist/**,src/**,docs/**,.env.example,SECURITY_FIX_COMPLETE.md"
   
   # Alternative: Disable secrets scanning entirely (not recommended)
   # SECRETS_SCAN_ENABLED = "false"
