@@ -133,6 +133,14 @@ export const AuthProvider = ({ children }) => {
       // Calculate token expiration time (Google tokens expire in 1 hour)
       const expiresAt = Date.now() + (3600 * 1000); // 1 hour from now
       
+      // Extract refresh token (only available on first consent or when prompt=consent)
+      const refreshToken = credential.refreshToken || null;
+      if (refreshToken) {
+        console.log('✅ Refresh token obtained (will never expire)');
+      } else {
+        console.warn('⚠️ No refresh token in response. May need to revoke app permissions and sign in again.');
+      }
+      
       // Store token in MongoDB for persistent access
       try {
         await usersAPI.syncUser(result.user.uid, {
@@ -141,12 +149,12 @@ export const AuthProvider = ({ children }) => {
           photoURL: result.user.photoURL,
           providerData: result.user.providerData,
           googleAccessToken: credential.oauthAccessToken,
-          googleRefreshToken: credential.refreshToken || null,
+          googleRefreshToken: refreshToken, // Store refresh token
           tokenExpiresAt: expiresAt
         });
-        console.log('✅ Access token saved to MongoDB');
+        console.log('✅ Access token and refresh token saved to MongoDB');
       } catch (error) {
-        console.error('Failed to save access token:', error);
+        console.error('Failed to save tokens:', error);
       }
     } else {
       console.error('❌ No OAuth access token in response!');
@@ -179,8 +187,16 @@ export const AuthProvider = ({ children }) => {
               const isExpired = userData.tokenExpiresAt && Date.now() > userData.tokenExpiresAt;
               
               if (isExpired) {
-                console.warn('⚠️ Token has expired. User needs to sign in with Google again.');
-                setGoogleAccessToken(null);
+                console.warn('⚠️ Token has expired. Attempting auto-refresh...');
+                
+                // Try to auto-refresh using refresh token
+                try {
+                  const newToken = await autoRefreshToken(user.uid);
+                  console.log('✅ Token auto-refreshed on startup');
+                } catch (refreshError) {
+                  console.error('❌ Auto-refresh failed:', refreshError);
+                  setGoogleAccessToken(null);
+                }
               } else {
                 setGoogleAccessToken(userData.googleAccessToken);
                 console.log('✅ Google access token restored from MongoDB');
@@ -206,11 +222,87 @@ export const AuthProvider = ({ children }) => {
     return unsubscribe;
   }, []);
 
+  // Auto-refresh token using refresh token (no popup needed!)
+  const autoRefreshToken = async (userId) => {
+    try {
+      console.log('🔄 Auto-refreshing token using refresh token...');
+      
+      const response = await fetch('/api/refresh-google-token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId })
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to refresh token');
+      }
+
+      const data = await response.json();
+      setGoogleAccessToken(data.accessToken);
+      console.log('✅ Token auto-refreshed successfully (no popup needed!)');
+      
+      return data.accessToken;
+    } catch (error) {
+      console.error('❌ Auto-refresh failed:', error);
+      throw error;
+    }
+  };
+
+  // Refresh Google Authentication (manual re-auth with popup)
+  const refreshGoogleAuth = async () => {
+    if (!currentUser) {
+      throw new Error('No user signed in');
+    }
+    
+    // Try automatic refresh first (using refresh token)
+    try {
+      console.log('🔄 Attempting automatic token refresh...');
+      const newToken = await autoRefreshToken(currentUser.uid);
+      return newToken;
+    } catch (autoRefreshError) {
+      console.warn('⚠️ Automatic refresh failed, falling back to popup:', autoRefreshError.message);
+    }
+    
+    // Fallback: Show Google sign-in popup
+    const result = await signInWithPopup(auth, googleProvider);
+    
+    // Get new Google OAuth access token
+    const credential = result._tokenResponse;
+    if (credential?.oauthAccessToken) {
+      setGoogleAccessToken(credential.oauthAccessToken);
+      console.log('✅ Google access token refreshed successfully');
+      
+      // Calculate token expiration time (Google tokens expire in 1 hour)
+      const expiresAt = Date.now() + (3600 * 1000); // 1 hour from now
+      
+      // Update token in MongoDB
+      try {
+        await usersAPI.syncUser(result.user.uid, {
+          email: result.user.email,
+          displayName: result.user.displayName,
+          googleAccessToken: credential.oauthAccessToken,
+          tokenExpiresAt: expiresAt
+        });
+        console.log('✅ Refreshed token saved to MongoDB');
+      } catch (mongoError) {
+        console.error('MongoDB sync error on token refresh:', mongoError);
+        // Continue even if MongoDB sync fails
+      }
+      
+      return credential.oauthAccessToken;
+    } else {
+      throw new Error('Failed to obtain access token');
+    }
+  };
+
   const value = {
     currentUser,
     signUp,
     signIn,
     signInWithGoogle,
+    refreshGoogleAuth,
+    autoRefreshToken,
     logout,
     loading,
     googleAccessToken, // Expose access token for YouTube API calls

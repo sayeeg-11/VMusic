@@ -4,7 +4,7 @@ import { X, Youtube, Loader2, Music, Play, AlertCircle, Download, CheckCircle } 
 import { youtubeAPI } from '../../api/youtube';
 import { playlistsAPI } from '../../api/playlists';
 
-const YouTubePlaylists = ({ isOpen, onClose, userId, accessToken, onPlayVideo }) => {
+const YouTubePlaylists = ({ isOpen, onClose, userId, accessToken, onPlayVideo, onRefreshAuth }) => {
   const [playlists, setPlaylists] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -37,8 +37,7 @@ const YouTubePlaylists = ({ isOpen, onClose, userId, accessToken, onPlayVideo })
       // Show user-friendly error message with instructions
       if (err.message.includes('expired') || err.message.includes('TOKEN_EXPIRED')) {
         setError(
-          '⏰ Your Google sign-in session has expired (tokens last 1 hour).\n\n' +
-          'Please sign out and sign in with Google again to get a fresh token.'
+          '🔒 Your Google access token has expired.\n\nDon\'t worry, we can refresh it automatically!'
         );
       } else if (err.message.includes('quotas') || err.message.includes('denied')) {
         setError(
@@ -308,13 +307,32 @@ const YouTubePlaylists = ({ isOpen, onClose, userId, accessToken, onPlayVideo })
                 <p className="text-gray-300 text-center max-w-2xl whitespace-pre-line leading-relaxed">
                   {error}
                 </p>
-                {(error.includes('sign in') || error.includes('expired')) && (
-                  <button
-                    onClick={onClose}
-                    className="mt-6 px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
-                  >
-                    Close & Sign In Again
-                  </button>
+                {(error.includes('sign in') || error.includes('expired')) && onRefreshAuth && (
+                  <div className="mt-6 flex flex-col items-center gap-3">
+                    <button
+                      onClick={async () => {
+                        try {
+                          setLoading(true);
+                          setError(null);
+                          await onRefreshAuth();
+                          // Retry fetching playlists with new token
+                          await fetchPlaylists();
+                        } catch (err) {
+                          console.error('Failed to refresh auth:', err);
+                          setError('Failed to refresh access. Please try again.');
+                        } finally {
+                          setLoading(false);
+                        }
+                      }}
+                      className="px-8 py-3 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white font-semibold rounded-lg transition-all shadow-lg hover:shadow-red-500/50 flex items-center gap-2"
+                    >
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
+                      </svg>
+                      Refresh Google Access
+                    </button>
+                    <p className="text-xs text-gray-500">No need to logout, just reauthorize.</p>
+                  </div>
                 )}
                 {error.includes('Google Cloud Console') && (
                   <div className="mt-6 text-center">

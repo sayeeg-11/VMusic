@@ -18,6 +18,7 @@ import {
   Dashboard,
   Favorites,
   Playlists,
+  PlaylistDetail,
   Profile,
   Explore,
   Search,
@@ -39,7 +40,7 @@ function App() {
           <Route path="/explore" element={<Explore />} />
           <Route path="/artists" element={<Artists />} />
           <Route path="/vibe-zone" element={<VibeZone />} />
-          <Route path="/vibe-tube" element={
+          <Route path="/vibetube" element={
             <ErrorBoundary>
               <VibeTube />
             </ErrorBoundary>
@@ -78,6 +79,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Playlists />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/playlist/:playlistId"
+            element={
+              <ProtectedRoute>
+                <PlaylistDetail />
               </ProtectedRoute>
             }
           />

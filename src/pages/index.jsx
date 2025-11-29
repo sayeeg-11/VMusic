@@ -5,6 +5,7 @@ export { default as Search } from './Search';
 export { default as Contact } from './Contact';
 export { default as Favorites } from './Favorites';
 export { default as Playlists } from './Playlists';
+export { default as PlaylistDetail } from './PlaylistDetail';
 export { default as Profile } from './Profile';
 export { default as Artist } from './Artist';
 export { default as PrivacyPolicy } from './PrivacyPolicy';

@@ -154,7 +154,8 @@ const Playlists = () => {
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.98 }}
                   transition={{ type: "spring", stiffness: 200, delay: index * 0.05 }}
-                  className="group relative bg-gradient-to-b from-[#1b0c2d] to-[#090e16] rounded-2xl p-4 border border-pink-500/20 hover:border-pink-500/60 shadow-lg hover:shadow-pink-500/30 backdrop-blur-lg overflow-hidden"
+                  onClick={() => navigate(`/playlist/${playlist._id}`)}
+                  className="group relative bg-gradient-to-b from-[#1b0c2d] to-[#090e16] rounded-2xl p-4 border border-pink-500/20 hover:border-pink-500/60 shadow-lg hover:shadow-pink-500/30 backdrop-blur-lg overflow-hidden cursor-pointer"
                 >
                   {/* Thumbnail Container with Blur Background */}
                   <div className="relative h-44 rounded-xl overflow-hidden mb-4">

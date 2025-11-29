@@ -25,7 +25,7 @@ const YOUTUBE_API_BASE = 'https://www.googleapis.com/youtube/v3';
 const VibeTube = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { currentUser, googleAccessToken } = useAuth();
+  const { currentUser, googleAccessToken, refreshGoogleAuth } = useAuth();
   
   const autoPlayVideo = location.state?.autoPlayVideo; // Get video from navigation state
   
@@ -1000,6 +1000,7 @@ const VibeTube = () => {
           userId={currentUser.uid}
           accessToken={googleAccessToken}
           onPlayVideo={playVideoDirectly}
+          onRefreshAuth={refreshGoogleAuth}
         />
       )}
 
