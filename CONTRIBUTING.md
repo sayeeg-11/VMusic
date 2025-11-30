@@ -102,7 +102,7 @@ Before submitting your PR:
 
 ---
 
-## 🔍 Review & Merge Policy
+## Review & Merge Policy
 
 | Stage                | Description             |
 | -------------------- | ----------------------- |
