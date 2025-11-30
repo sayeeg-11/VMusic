@@ -8,10 +8,10 @@ A modern, open-source music streaming platform featuring indie music from Jamend
 ## ❄️ Winter of Code Social 2025
 This project is part of **WOC Social 2025**. Contributors must follow the guidelines below to ensure successful participation.
 
-🧑‍💼 **Project Admin:** Vishal Baraiya
-🧑‍🏫 **Mentors:** *To be updated once assigned*  
-📦 **Repository:** https://github.com/mr-baraiya/VMusic  
-💬 **Discord Forum:** *Will be added after forum creation*
+**Project Admin:** Vishal Baraiya
+**Mentors:** *To be updated once assigned*  
+**Repository:** https://github.com/mr-baraiya/VMusic  
+**Discord Forum:** *Will be added after forum creation*
 
 ---
 
