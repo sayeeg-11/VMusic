@@ -9,6 +9,7 @@ import { toast } from '../components/Toast';
 import { doc, getDoc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { searchHistoryAPI } from '../api/users';
+import SignIn from '../components/auth/SignIn';
 
 const Search = () => {
   const { playTrack } = usePlayer();
@@ -20,6 +21,7 @@ const Search = () => {
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [likedTracks, setLikedTracks] = useState(new Set());
+  const [showSignInModal, setShowSignInModal] = useState(false);
 
   // Load liked tracks
   useEffect(() => {
@@ -113,7 +115,7 @@ const Search = () => {
   const toggleLike = async (trackId) => {
     // Check if user is logged in
     if (!currentUser) {
-      toast.show('Please sign in to like tracks', 'error');
+      setShowSignInModal(true);
       return;
     }
 
@@ -352,6 +354,14 @@ const Search = () => {
           </motion.div>
         )}
       </div>
+
+      {/* Sign In Modal */}
+      {showSignInModal && (
+        <SignIn
+          onClose={() => setShowSignInModal(false)}
+          onSwitchToSignUp={() => setShowSignInModal(false)}
+        />
+      )}
     </div>
   );
 };

@@ -19,6 +19,7 @@ import { usePlayer } from '../contexts/PlayerContext';
 import { useAuth } from '../contexts/AuthContext';
 import { toast } from '../components/Toast';
 import jamendoAPI from '../api/jamendo';
+import SignIn from '../components/auth/SignIn';
 import { doc, getDoc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { db } from '../config/firebase';
 
@@ -33,6 +34,7 @@ const TrackDetails = () => {
   const [relatedTracks, setRelatedTracks] = useState([]);
   const [isLiked, setIsLiked] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showSignInModal, setShowSignInModal] = useState(false);
 
   useEffect(() => {
     loadTrackDetails();
@@ -91,7 +93,7 @@ const TrackDetails = () => {
 
   const toggleLike = async () => {
     if (!currentUser) {
-      toast.show('Please sign in to like tracks', 'error');
+      setShowSignInModal(true);
       return;
     }
 
@@ -450,6 +452,14 @@ const TrackDetails = () => {
           </div>
         )}
       </div>
+
+      {/* Sign In Modal */}
+      {showSignInModal && (
+        <SignIn
+          onClose={() => setShowSignInModal(false)}
+          onSwitchToSignUp={() => setShowSignInModal(false)}
+        />
+      )}
     </div>
   );
 };

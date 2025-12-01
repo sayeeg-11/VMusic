@@ -8,6 +8,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { toast } from '../components/Toast';
 import { doc, getDoc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { db } from '../config/firebase';
+import SignIn from '../components/auth/SignIn';
 
 const Artist = () => {
   const { id } = useParams();
@@ -18,6 +19,7 @@ const Artist = () => {
   const [tracks, setTracks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [likedTracks, setLikedTracks] = useState(new Set());
+  const [showSignInModal, setShowSignInModal] = useState(false);
 
   useEffect(() => {
     loadArtistData();
@@ -68,7 +70,7 @@ const Artist = () => {
   const toggleLike = async (trackId) => {
     // Check if user is logged in
     if (!currentUser) {
-      toast.show('Please sign in to like tracks', 'error');
+      setShowSignInModal(true);
       return;
     }
 
@@ -466,6 +468,14 @@ const Artist = () => {
           )}
         </div>
       </div>
+
+      {/* Sign In Modal */}
+      {showSignInModal && (
+        <SignIn
+          onClose={() => setShowSignInModal(false)}
+          onSwitchToSignUp={() => setShowSignInModal(false)}
+        />
+      )}
     </div>
   );
 };

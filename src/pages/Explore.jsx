@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from '../components/Toast';
 import { doc, getDoc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { db } from '../config/firebase';
+import SignIn from '../components/auth/SignIn';
 
 const Explore = () => {
   const { playTrack } = usePlayer();
@@ -21,6 +22,7 @@ const Explore = () => {
   const [likedTracks, setLikedTracks] = useState(new Set());
   const [limit, setLimit] = useState(24);
   const [hasMore, setHasMore] = useState(true);
+  const [showSignInModal, setShowSignInModal] = useState(false);
 
   const categories = [
     { id: 'trending', label: 'Trending', icon: TrendingUp },
@@ -161,7 +163,7 @@ const Explore = () => {
   const toggleLike = async (trackId) => {
     // Check if user is logged in
     if (!currentUser) {
-      toast.show('Please sign in to like tracks', 'error');
+      setShowSignInModal(true);
       return;
     }
 
@@ -372,6 +374,14 @@ const Explore = () => {
           </div>
         )}
       </div>
+
+      {/* Sign In Modal */}
+      {showSignInModal && (
+        <SignIn
+          onClose={() => setShowSignInModal(false)}
+          onSwitchToSignUp={() => setShowSignInModal(false)}
+        />
+      )}
     </div>
   );
 };

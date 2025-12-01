@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Play, Music2, Sparkles } from 'lucide-react';
+import { Play, Music2, Sparkles, Youtube, Download } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Hero = () => {
@@ -45,71 +45,21 @@ const Hero = () => {
         />
       </div>
 
-      {/* Floating Music Icons */}
-      <motion.div
-        className="absolute top-32 left-20 text-white/10"
-        animate={{
-          y: [0, -20, 0],
-          rotate: [0, 10, 0],
-        }}
-        transition={{
-          duration: 5,
-          repeat: Infinity,
-          ease: 'easeInOut',
-        }}
-      >
-        <Music2 size={64} />
-      </motion.div>
-      <motion.div
-        className="absolute bottom-32 right-32 text-white/10"
-        animate={{
-          y: [0, 20, 0],
-          rotate: [0, -10, 0],
-        }}
-        transition={{
-          duration: 6,
-          repeat: Infinity,
-          ease: 'easeInOut',
-        }}
-      >
-        <Music2 size={80} />
-      </motion.div>
-
       {/* Main Content */}
-      <div className="relative z-10 text-center px-4 max-w-5xl mx-auto">
-        {/* Logo Animation - CD Player Effect */}
+      <div className="relative z-10 text-center px-4 max-w-6xl mx-auto">
+        {/* Logo Animation - Simplified */}
         <motion.div
           initial={{ scale: 0, rotate: -180 }}
           animate={{ scale: 1, rotate: 0 }}
           transition={{
             type: 'spring',
-            stiffness: 260,
+            stiffness: 200,
             damping: 20,
-            duration: 1,
           }}
-          className="mb-12 flex justify-center"
+          className="mb-8 flex justify-center"
         >
-          <div className="relative group">
-            {/* Outer glow effect */}
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 rounded-full blur-3xl opacity-60 animate-pulse"></div>
-
-            {/* Spinning CD ring */}
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{
-                duration: 8,
-                repeat: Infinity,
-                ease: 'linear',
-              }}
-              className="absolute inset-0 rounded-full"
-              style={{
-                background:
-                  'conic-gradient(from 0deg, transparent 0deg, rgba(139, 92, 246, 0.3) 90deg, transparent 180deg, rgba(236, 72, 153, 0.3) 270deg, transparent 360deg)',
-                transform: 'scale(1.15)',
-              }}
-            />
-
-            {/* CD player effect with rotating logo */}
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 rounded-full blur-2xl opacity-50"></div>
             <motion.div
               animate={{ rotate: 360 }}
               transition={{
@@ -117,39 +67,14 @@ const Hero = () => {
                 repeat: Infinity,
                 ease: 'linear',
               }}
-              className="relative p-3 bg-gradient-to-br from-gray-900/80 to-purple-900/80 rounded-full backdrop-blur-sm border-4 border-purple-500/30 shadow-2xl"
+              className="relative p-2 bg-gradient-to-br from-gray-900/80 to-purple-900/80 rounded-full backdrop-blur-sm border-4 border-purple-500/30 shadow-2xl"
             >
-              {/* CD center hole effect */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-12 h-12 bg-gradient-to-br from-gray-800 to-gray-900 rounded-full shadow-inner"></div>
-              </div>
-
-              {/* Logo */}
               <img
                 src="/logo.png"
                 alt="VMusic Logo"
-                className="w-40 h-40 md:w-48 md:h-48 drop-shadow-2xl relative z-10"
+                className="w-32 h-32 md:w-40 md:h-40 drop-shadow-2xl relative z-10"
               />
             </motion.div>
-
-            {/* Vinyl grooves effect */}
-            <div className="absolute inset-0 rounded-full pointer-events-none">
-              {[...Array(5)].map((_, i) => (
-                <motion.div
-                  key={i}
-                  className="absolute inset-0 rounded-full border border-white/5"
-                  style={{
-                    transform: `scale(${1 + i * 0.08})`,
-                  }}
-                  animate={{ opacity: [0.1, 0.3, 0.1] }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                    delay: i * 0.2,
-                  }}
-                />
-              ))}
-            </div>
           </div>
         </motion.div>
 
@@ -158,7 +83,7 @@ const Hero = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="text-6xl md:text-7xl lg:text-8xl font-bold mb-6"
+          className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6"
         >
           <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-purple-500 bg-clip-text text-transparent">
             V
@@ -175,16 +100,16 @@ const Hero = () => {
           transition={{ duration: 0.8, delay: 0.4 }}
           className="text-xl md:text-2xl lg:text-3xl text-gray-200 mb-4 font-light"
         >
-          Discover & Stream Free Independent Music
+          Discover Free Independent Music
         </motion.p>
 
         <motion.p
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.6 }}
-          className="text-base md:text-lg text-gray-400 mb-12 max-w-2xl mx-auto"
+          transition={{ duration: 0.8, delay: 0.5 }}
+          className="text-base md:text-lg text-gray-400 mb-10 max-w-2xl mx-auto"
         >
-          Stream half a million royalty-free tracks powered by Jamendo API.
+          Stream 500K+ royalty-free tracks + Import your YouTube playlists
           <span className="inline-flex items-center ml-2">
             <Sparkles size={20} className="text-yellow-400" />
           </span>
@@ -204,7 +129,7 @@ const Hero = () => {
               className="group px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-full font-semibold text-lg shadow-lg shadow-green-500/50 hover:shadow-green-500/80 transition-all duration-300 flex items-center gap-2"
             >
               <Play size={20} fill="white" />
-              Explore Music
+              Start Listening
               <motion.span
                 animate={{ x: [0, 5, 0] }}
                 transition={{ duration: 1.5, repeat: Infinity }}
@@ -213,26 +138,63 @@ const Hero = () => {
               </motion.span>
             </motion.button>
           </Link>
+
+          <Link to="/signup">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-full font-semibold text-lg border-2 border-white/20 hover:bg-white/20 transition-all duration-300"
+            >
+              Sign Up Free
+            </motion.button>
+          </Link>
         </motion.div>
 
         {/* Stats */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 1.2 }}
-          className="mt-16 grid grid-cols-3 gap-8 max-w-3xl mx-auto"
+          transition={{ duration: 1, delay: 1 }}
+          className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto"
         >
-          <div className="text-center">
-            <div className="text-3xl md:text-4xl font-bold text-white mb-2">500K+</div>
+          <div className="text-center group">
+            <motion.div
+              whileHover={{ scale: 1.1 }}
+              className="text-3xl md:text-4xl font-bold text-white mb-2 flex items-center justify-center gap-2"
+            >
+              <Music2 className="text-purple-400" size={28} />
+              500K+
+            </motion.div>
             <div className="text-sm md:text-base text-gray-400">Free Tracks</div>
           </div>
-          <div className="text-center">
-            <div className="text-3xl md:text-4xl font-bold text-white mb-2">40K+</div>
+          <div className="text-center group">
+            <motion.div
+              whileHover={{ scale: 1.1 }}
+              className="text-3xl md:text-4xl font-bold text-white mb-2 flex items-center justify-center gap-2"
+            >
+              <Sparkles className="text-pink-400" size={28} />
+              40K+
+            </motion.div>
             <div className="text-sm md:text-base text-gray-400">Artists</div>
           </div>
-          <div className="text-center">
-            <div className="text-3xl md:text-4xl font-bold text-white mb-2">100%</div>
-            <div className="text-sm md:text-base text-gray-400">Legal & Free</div>
+          <div className="text-center group">
+            <motion.div
+              whileHover={{ scale: 1.1 }}
+              className="text-3xl md:text-4xl font-bold text-white mb-2 flex items-center justify-center gap-2"
+            >
+              <Youtube className="text-red-400" size={32} />
+            </motion.div>
+            <div className="text-sm md:text-base text-gray-400">YouTube Import</div>
+          </div>
+          <div className="text-center group">
+            <motion.div
+              whileHover={{ scale: 1.1 }}
+              className="text-3xl md:text-4xl font-bold text-white mb-2 flex items-center justify-center gap-2"
+            >
+              <Play className="text-green-400" size={28} fill="currentColor" />
+              100%
+            </motion.div>
+            <div className="text-sm md:text-base text-gray-400">Free Forever</div>
           </div>
         </motion.div>
 
@@ -240,7 +202,7 @@ const Hero = () => {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 1.5 }}
+          transition={{ duration: 1, delay: 1.2 }}
           className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
         >
           <motion.div

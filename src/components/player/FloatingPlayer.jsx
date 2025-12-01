@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import {
   Play,
   Pause,
@@ -17,6 +18,7 @@ import {
 } from 'lucide-react';
 import { usePlayer } from '../../contexts/PlayerContext';
 import jamendoAPI from '../../api/jamendo';
+import SignIn from '../auth/SignIn';
 
 const FloatingPlayer = () => {
   const {
@@ -33,10 +35,12 @@ const FloatingPlayer = () => {
   } = usePlayer();
 
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
   const [showVolume, setShowVolume] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [previousVolume, setPreviousVolume] = useState(volume);
   const [isVisible, setIsVisible] = useState(true);
+  const [showSignInModal, setShowSignInModal] = useState(false);
 
   if (!currentTrack || !isVisible) return null;
 
@@ -153,9 +157,21 @@ const FloatingPlayer = () => {
               </div>
 
               {/* Like Button (Desktop) */}
-              <button className="hidden md:block text-gray-400 hover:text-pink-500 transition-colors">
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => {
+                  if (!currentUser) {
+                    setShowSignInModal(true);
+                  } else {
+                    // TODO: Add to favorites
+                    console.log('Add to favorites');
+                  }
+                }}
+                className="hidden md:block text-gray-400 hover:text-pink-500 transition-colors"
+              >
                 <Heart size={20} />
-              </button>
+              </motion.button>
             </div>
 
             {/* Player Controls - Single Line */}
@@ -273,6 +289,17 @@ const FloatingPlayer = () => {
           </div>
         </div>
       </motion.div>
+
+      {/* Sign In Modal */}
+      {showSignInModal && (
+        <SignIn
+          onClose={() => setShowSignInModal(false)}
+          onSwitchToSignUp={() => {
+            setShowSignInModal(false);
+            // If you have sign up modal, open it here
+          }}
+        />
+      )}
     </AnimatePresence>
   );
 };

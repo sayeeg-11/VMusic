@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Hero,
@@ -7,10 +7,13 @@ import {
   HowItWorks,
   Footer,
 } from '../components/landing';
+import { SignIn, SignUp } from '../components/auth';
 
 const Landing = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const [showSignIn, setShowSignIn] = useState(false);
+  const [showSignUp, setShowSignUp] = useState(false);
 
   useEffect(() => {
     // Check if this is a Firebase auth action (password reset, email verification, etc.)
@@ -27,10 +30,30 @@ const Landing = () => {
   return (
     <div>
       <Hero />
-      <Features />
+      <Features onOpenSignIn={() => setShowSignIn(true)} />
       <ExploreLanding />
       <HowItWorks />
       <Footer />
+
+      {showSignIn && (
+        <SignIn
+          onClose={() => setShowSignIn(false)}
+          onSwitchToSignUp={() => {
+            setShowSignIn(false);
+            setShowSignUp(true);
+          }}
+        />
+      )}
+
+      {showSignUp && (
+        <SignUp
+          onClose={() => setShowSignUp(false)}
+          onSwitchToSignIn={() => {
+            setShowSignUp(false);
+            setShowSignIn(true);
+          }}
+        />
+      )}
     </div>
   );
 };

@@ -1,10 +1,71 @@
 import { motion } from 'framer-motion';
 import { Play, ChevronRight, Music2, Sparkles } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, memo, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePlayer } from '../../contexts/PlayerContext';
 import { musicAPI } from '../../api/music';
 import jamendoAPI from '../../api/jamendo';
+
+// Extract TrackCard outside to prevent re-renders
+const TrackCard = memo(({ track, tracks, onNavigate, onPlay }) => {
+  return (
+    <div
+      className="group relative bg-gray-800/50 backdrop-blur-lg rounded-xl overflow-hidden border border-gray-700 hover:border-green-500/50 hover:-translate-y-2 transition-all duration-300 cursor-pointer shrink-0 w-[200px]"
+      onClick={() => onNavigate(track.id)}
+    >
+      {/* Album Art */}
+      <div className="relative overflow-hidden aspect-square">
+        <img
+          src={track.image || track.album_image || 'https://via.placeholder.com/200'}
+          alt={track.name}
+          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+          loading="lazy"
+        />
+
+        {/* Source Badge */}
+        {track.source === 'spotify' && (
+          <div className="absolute top-2 left-2 px-2 py-1 bg-green-500 rounded-full text-xs font-semibold flex items-center gap-1 pointer-events-none">
+            <Music2 size={12} />
+            Spotify
+          </div>
+        )}
+
+        {/* Overlay with Play Button */}
+        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none group-hover:pointer-events-auto">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              if (track.audio || track.preview_url) {
+                onPlay(track, tracks);
+              }
+            }}
+            className={`w-12 h-12 bg-green-500 rounded-full shadow-lg hover:bg-green-600 hover:scale-110 active:scale-95 transition-all flex items-center justify-center ${!track.audio && !track.preview_url ? 'opacity-50 cursor-not-allowed' : ''}`}
+            disabled={!track.audio && !track.preview_url}
+          >
+            <Play size={20} fill="white" className="text-white ml-0.5" />
+          </button>
+        </div>
+
+        {/* Duration Badge */}
+        <div className="absolute bottom-2 right-2 px-2 py-1 bg-black/70 backdrop-blur-sm rounded-full text-xs pointer-events-none">
+          {track.source === 'spotify' && track.preview_url
+            ? '0:30'
+            : jamendoAPI.formatDuration(track.duration)}
+        </div>
+      </div>
+
+      {/* Track Info */}
+      <div className="p-3">
+        <h3 className="font-semibold text-sm mb-1 truncate group-hover:text-green-400 transition-colors">
+          {track.name}
+        </h3>
+        <p className="text-gray-400 text-xs truncate">{track.artist_name}</p>
+      </div>
+    </div>
+  );
+});
+
+TrackCard.displayName = 'TrackCard';
 
 const Explore = () => {
   const navigate = useNavigate();
@@ -13,6 +74,28 @@ const Explore = () => {
   const [latestTracks, setLatestTracks] = useState([]);
   const [loadingPopular, setLoadingPopular] = useState(true);
   const [loadingLatest, setLoadingLatest] = useState(true);
+
+  // Use ref to maintain stable reference to playTrack
+  const playTrackRef = useRef(playTrack);
+
+  useEffect(() => {
+    playTrackRef.current = playTrack;
+  }, [playTrack]);
+
+  // Use useMemo to create stable references that won't change unless dependencies change
+  const handleNavigate = useMemo(
+    () => (trackId) => {
+      navigate(`/track/${trackId}`);
+    },
+    [navigate]
+  );
+
+  const handlePlay = useMemo(
+    () => (track, tracks) => {
+      playTrackRef.current(track, tracks);
+    },
+    []
+  ); // No dependencies - always stable
   const [musicSource, setMusicSource] = useState('combined'); // 'jamendo', 'spotify', or 'combined'
 
   // Initialize Spotify for guest users
@@ -50,65 +133,6 @@ const Explore = () => {
 
     fetchLatest();
   }, []);
-
-  const TrackCard = ({ track, tracks }) => (
-    <motion.div
-      whileHover={{ y: -8 }}
-      transition={{ duration: 0.2, ease: 'easeOut' }}
-      className="group relative bg-gray-800/50 backdrop-blur-lg rounded-xl overflow-hidden border border-gray-700 hover:border-green-500/50 transition-colors duration-300 cursor-pointer shrink-0 w-[200px]"
-      onClick={() => navigate(`/track/${track.id}`)}
-    >
-      {/* Album Art */}
-      <div className="relative overflow-hidden aspect-square">
-        <img
-          src={track.image || track.album_image || 'https://via.placeholder.com/200'}
-          alt={track.name}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-        />
-
-        {/* Source Badge */}
-        {track.source === 'spotify' && (
-          <div className="absolute top-2 left-2 px-2 py-1 bg-green-500 rounded-full text-xs font-semibold flex items-center gap-1">
-            <Music2 size={12} />
-            Spotify
-          </div>
-        )}
-
-        {/* Overlay with Play Button */}
-        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={(e) => {
-              e.stopPropagation();
-              if (track.audio || track.preview_url) {
-                playTrack(track, tracks);
-              }
-            }}
-            className={`w-12 h-12 bg-green-500 rounded-full shadow-lg hover:bg-green-600 transition-colors flex items-center justify-center ${!track.audio && !track.preview_url ? 'opacity-50 cursor-not-allowed' : ''}`}
-            disabled={!track.audio && !track.preview_url}
-          >
-            <Play size={20} fill="white" className="text-white ml-0.5" />
-          </motion.button>
-        </div>
-
-        {/* Duration Badge */}
-        <div className="absolute bottom-2 right-2 px-2 py-1 bg-black/70 backdrop-blur-sm rounded-full text-xs">
-          {track.source === 'spotify' && track.preview_url
-            ? '0:30'
-            : jamendoAPI.formatDuration(track.duration)}
-        </div>
-      </div>
-
-      {/* Track Info */}
-      <div className="p-3">
-        <h3 className="font-semibold text-sm mb-1 truncate group-hover:text-green-400 transition-colors">
-          {track.name}
-        </h3>
-        <p className="text-gray-400 text-xs truncate">{track.artist_name}</p>
-      </div>
-    </motion.div>
-  );
 
   const LoadingSkeleton = () => (
     <div className="shrink-0 w-[200px] bg-gray-800/50 rounded-xl overflow-hidden animate-pulse">
@@ -157,6 +181,8 @@ const Explore = () => {
                     key={`popular-${track.id}-${index}`}
                     track={track}
                     tracks={popularTracks}
+                    onNavigate={handleNavigate}
+                    onPlay={handlePlay}
                   />
                 ))
               ) : (
@@ -202,6 +228,8 @@ const Explore = () => {
                     key={`latest-${track.id}-${index}`}
                     track={track}
                     tracks={latestTracks}
+                    onNavigate={handleNavigate}
+                    onPlay={handlePlay}
                   />
                 ))
               ) : (
@@ -234,7 +262,7 @@ const Explore = () => {
       </div>
 
       {/* Custom scrollbar styles */}
-      <style jsx>{`
+      <style>{`
         .scrollbar-hide::-webkit-scrollbar {
           display: none;
         }

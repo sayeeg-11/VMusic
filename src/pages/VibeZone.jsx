@@ -122,7 +122,8 @@ const VibeZone = () => {
       const response = await fetch(`${apiBaseUrl}/spotify-token`);
 
       if (!response.ok) {
-        throw new Error('Failed to get Spotify token from backend');
+        console.warn('Backend Spotify API not available, using guest mode');
+        return;
       }
 
       const data = await response.json();
@@ -136,12 +137,9 @@ const VibeZone = () => {
 
         setAccessToken(data.access_token);
         setTokenExpiry(expiryTime);
-      } else {
-        throw new Error('No access token received');
       }
     } catch (error) {
-      console.error('Error getting Spotify token:', error);
-      toast.show('Failed to connect to Spotify. Please try again.', 'error');
+      console.warn('Spotify backend not configured, using guest mode');
       setLoading(false);
     }
   };

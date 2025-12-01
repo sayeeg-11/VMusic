@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { UserPlus, Search as SearchIcon, ListMusic, Music2, Sparkles } from 'lucide-react';
+import { UserPlus, Youtube, ListMusic, Play, Sparkles } from 'lucide-react';
 
 const steps = [
   {
@@ -7,27 +7,32 @@ const steps = [
     number: '01',
     title: 'Sign Up / Log In',
     description:
-      'Create your free account with email or Google. Connect Spotify for enhanced features and personalized recommendations.',
+      'Create your free account with email or Google. Quick and easy setup to get started with VMusic.',
     gradient: 'from-purple-500 to-pink-500',
-    badge: 'Free Forever',
   },
   {
-    icon: SearchIcon,
+    icon: Youtube,
     number: '02',
-    title: 'Discover Music',
+    title: 'Connect YouTube',
     description:
-      'Browse 500,000+ royalty-free tracks from Jamendo. Access millions of Spotify previews (30s) as guest or full library when logged in.',
-    gradient: 'from-blue-500 to-cyan-500',
-    badge: 'Dual Source',
+      'Click "Connect with Google" in VibeTube. Authorize VMusic to access your YouTube playlists. One-time setup, instant access.',
+    gradient: 'from-red-500 to-pink-500',
   },
   {
     icon: ListMusic,
     number: '03',
-    title: 'Save & Create Playlists',
+    title: 'Import Playlists',
     description:
-      'Like your favorites, create custom playlists, and sync across all your devices. Get AI-powered recommendations.',
+      'All your YouTube playlists automatically appear in VMusic. Browse, search, and organize your collections seamlessly.',
+    gradient: 'from-blue-500 to-cyan-500',
+  },
+  {
+    icon: Play,
+    number: '04',
+    title: 'Play Anywhere',
+    description:
+      'Stream your YouTube playlists directly in VMusic. No switching apps. Enjoy all your music in one place, ad-free.',
     gradient: 'from-green-500 to-emerald-500',
-    badge: 'Smart Playlists',
   },
 ];
 
@@ -44,20 +49,20 @@ const HowItWorks = () => {
           className="text-center mb-20"
         >
           <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900 dark:text-white">
-            How It Works
+            Import Your YouTube Playlists
           </h2>
           <p className="text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
-            Get started with VMusic in three simple steps. Access millions of tracks and discover
-            your next favorite song.
+            Get started with VMusic in four simple steps. Connect your YouTube account and access
+            all your playlists instantly.
           </p>
         </motion.div>
 
         {/* Steps */}
         <div className="relative">
           {/* Connection Line */}
-          <div className="hidden lg:block absolute top-1/2 left-0 right-0 h-1 bg-gradient-to-r from-purple-200 via-blue-200 to-green-200 dark:from-purple-900 dark:via-blue-900 dark:to-green-900 transform -translate-y-1/2 -z-10"></div>
+          <div className="hidden lg:block absolute top-1/2 left-0 right-0 h-1 bg-gradient-to-r from-purple-200 via-red-200 via-blue-200 to-green-200 dark:from-purple-900 dark:via-red-900 dark:via-blue-900 dark:to-green-900 transform -translate-y-1/2 -z-10"></div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
             {steps.map((step, index) => {
               const Icon = step.icon;
               return (
@@ -81,7 +86,7 @@ const HowItWorks = () => {
                       {step.number}
                     </div>
 
-                    {/* Icon with Badge */}
+                    {/* Icon */}
                     <div className="relative inline-block">
                       <motion.div
                         whileHover={{ rotate: 360, scale: 1.1 }}
@@ -90,11 +95,6 @@ const HowItWorks = () => {
                       >
                         <Icon className="text-white" size={36} />
                       </motion.div>
-                      {step.badge && (
-                        <span className="absolute -top-2 -right-2 px-2 py-1 bg-white dark:bg-gray-900 text-xs font-bold text-gray-900 dark:text-white rounded-full border-2 border-gray-200 dark:border-gray-700 shadow-lg">
-                          {step.badge}
-                        </span>
-                      )}
                     </div>
 
                     {/* Content */}
