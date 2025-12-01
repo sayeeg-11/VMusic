@@ -5,6 +5,7 @@ import {
   Features,
   Explore as ExploreLanding,
   HowItWorks,
+  YouTubeSection,
   Footer,
 } from '../components/landing';
 import { SignIn, SignUp } from '../components/auth';
@@ -33,7 +34,8 @@ const Landing = () => {
       <Features onOpenSignIn={() => setShowSignIn(true)} />
       <ExploreLanding />
       <HowItWorks />
-      <Footer />
+      <YouTubeSection />
+      <Footer onOpenSignIn={() => setShowSignIn(true)} />
 
       {showSignIn && (
         <SignIn

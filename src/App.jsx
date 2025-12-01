@@ -12,7 +12,6 @@ import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Artists from './pages/Artists';
 import Album from './pages/Album';
-import VibeZone from './pages/VibeZone';
 import VibeTube from './pages/VibeTube';
 import {
   Dashboard,
@@ -23,6 +22,7 @@ import {
   Explore,
   Search,
   Artist,
+  Albums,
   Contact,
   PrivacyPolicy,
   TermsOfService,
@@ -39,7 +39,7 @@ function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/explore" element={<Explore />} />
           <Route path="/artists" element={<Artists />} />
-          <Route path="/vibe-zone" element={<VibeZone />} />
+          <Route path="/albums" element={<Albums />} />
           <Route
             path="/vibetube"
             element={

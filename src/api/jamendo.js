@@ -83,6 +83,42 @@ export const jamendoAPI = {
   },
 
   /**
+   * Get popular albums
+   * @param {number} limit - Number of albums to fetch
+   * @returns {Promise<Object>} API response with albums
+   */
+  getPopularAlbums: async (limit = 20) => {
+    try {
+      const response = await fetch(
+        `${BASE_URL}/albums/?client_id=${CLIENT_ID}&format=json&limit=${limit}&order=popularity_total&imagesize=300&audioformat=mp32`
+      );
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error fetching popular albums:', error);
+      return { headers: { status: 'error' }, results: [] };
+    }
+  },
+
+  /**
+   * Get new albums
+   * @param {number} limit - Number of albums to fetch
+   * @returns {Promise<Object>} API response with albums
+   */
+  getNewAlbums: async (limit = 20) => {
+    try {
+      const response = await fetch(
+        `${BASE_URL}/albums/?client_id=${CLIENT_ID}&format=json&limit=${limit}&order=releasedate_desc&imagesize=300&audioformat=mp32&type=album`
+      );
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error fetching new albums:', error);
+      return { headers: { status: 'error' }, results: [] };
+    }
+  },
+
+  /**
    * Get new release tracks
    * @param {number} limit - Number of tracks to fetch
    * @returns {Promise<Object>} API response with tracks

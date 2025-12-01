@@ -260,7 +260,7 @@ const TrackDetails = () => {
             <button
               onClick={() => {
                 if (!currentUser) {
-                  toast.show('Please sign in to add tracks to playlists', 'error');
+                  setShowSignInModal(true);
                 } else {
                   toast.show('Playlist feature coming soon!', 'info');
                 }

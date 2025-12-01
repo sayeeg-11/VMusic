@@ -10,13 +10,14 @@ import {
   CheckCircle,
   AlertCircle,
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import emailjs from '@emailjs/browser';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 
-const Footer = () => {
+const Footer = ({ onOpenSignIn }) => {
   const currentYear = new Date().getFullYear();
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState({ type: '', message: '' });
@@ -118,7 +119,8 @@ const Footer = () => {
   };
 
   return (
-    <footer className="bg-gray-900 text-gray-300 pt-16 pb-8">
+    <>
+      <footer className="bg-gray-900 text-gray-300 pt-16 pb-8">
       <div className="max-w-7xl mx-auto px-4">
         {/* Main Footer Content */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-12 mb-12">
@@ -335,6 +337,7 @@ const Footer = () => {
         </div>
       </div>
     </footer>
+  </>
   );
 };
 

@@ -67,7 +67,7 @@ const features = [
 
 const Features = ({ onOpenSignIn }) => {
   return (
-    <section className="py-20 px-4 bg-gray-50 dark:bg-gray-900">
+    <section className="py-20 px-4 bg-gray-950">
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
         <motion.div
@@ -195,20 +195,7 @@ const Features = ({ onOpenSignIn }) => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.3 }}
-          className="text-center mt-16"
-        >
-          <p className="text-lg text-gray-600 dark:text-gray-400 mb-6">
-            Ready to experience the difference?
-          </p>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300"
-            onClick={onOpenSignIn}
-          >
-            Get Started Free
-          </motion.button>
-        </motion.div>
+        />
       </div>
     </section>
   );

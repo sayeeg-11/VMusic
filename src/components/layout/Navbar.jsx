@@ -52,7 +52,7 @@ const Navbar = () => {
   const guestLinks = [
     { name: 'Explore', path: '/explore', icon: Compass },
     { name: 'Artists', path: '/artists', icon: Users },
-    { name: 'Vibe Zone', path: '/vibe-zone', icon: Disc3 },
+    { name: 'Albums', path: '/albums', icon: Disc3 },
     { name: 'VibeTube', path: '/vibetube', icon: Youtube },
   ];
 
@@ -60,7 +60,7 @@ const Navbar = () => {
     { name: 'Dashboard', path: '/dashboard', icon: Home },
     { name: 'Explore', path: '/explore', icon: Compass },
     { name: 'Artists', path: '/artists', icon: Users },
-    { name: 'Vibe Zone', path: '/vibe-zone', icon: Sparkles },
+    { name: 'Albums', path: '/albums', icon: Disc3 },
     { name: 'VibeTube', path: '/vibetube', icon: Youtube },
   ];
 

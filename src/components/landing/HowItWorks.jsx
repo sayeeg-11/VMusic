@@ -38,7 +38,7 @@ const steps = [
 
 const HowItWorks = () => {
   return (
-    <section className="py-20 px-4 bg-white dark:bg-gray-900">
+    <section className="py-20 px-4 bg-gray-950">
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
         <motion.div
@@ -59,9 +59,6 @@ const HowItWorks = () => {
 
         {/* Steps */}
         <div className="relative">
-          {/* Connection Line */}
-          <div className="hidden lg:block absolute top-1/2 left-0 right-0 h-1 bg-gradient-to-r from-purple-200 via-red-200 via-blue-200 to-green-200 dark:from-purple-900 dark:via-red-900 dark:via-blue-900 dark:to-green-900 transform -translate-y-1/2 -z-10"></div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
             {steps.map((step, index) => {
               const Icon = step.icon;

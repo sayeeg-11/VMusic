@@ -145,7 +145,7 @@ const Explore = () => {
   );
 
   return (
-    <section className="py-20 px-4 bg-gradient-to-b from-gray-900 to-black text-white">
+    <section className="py-20 px-4 bg-gray-950 text-white">
       <div className="max-w-7xl mx-auto">
         {/* Popular Songs Section */}
         <motion.div
