@@ -1,85 +1,88 @@
+
+
+---
+
 # 🎵 VMusic – Indie Music Streaming Web App
 
-"Feel the Indie Beat. Free. Forever."
+### **"Feel the Indie Beat. Free. Forever."**
 
-A modern, open-source music streaming platform featuring indie music from Jamendo and Spotify’s 30-sec preview tracks. Built with React, Vite, Tailwind CSS, Firebase, and Vercel. Contributors will enhance functionality, optimize performance, and introduce new features to improve the listening experience.
+<p align="center">
+  <img src="https://raw.githubusercontent.com/WinterofCode/Winter-of-Code-Assets/main/WOCS_2025/banner.png" width="800"/>
+</p>
 
----
+<p align="center">
+  <img src="https://raw.githubusercontent.com/mr-baraiya/VMusic/main/docs/hero.png" width="850" alt="VMusic Hero Banner"/>
+</p>
 
-## ❄️ Winter of Code Social 2025
-
-This project is part of **Winter of Code Social 2025 (WOCS 2025)**.  
-Contributors must follow the guidelines below to ensure successful participation.
-
-| Role                  | Person                                                               |
-| --------------------- | -------------------------------------------------------------------- |
-| **Project Admin**     | Vishal Baraiya                                                       |
-| **Mentors**           | _To be updated once assigned_                                        |
-| **GitHub Repository** | https://github.com/mr-baraiya/VMusic                                 |
-| **Discord Forum**     | https://discord.com/channels/1049667734025289729/1444724828379811942 |
+<p align="center">
+  <b>A modern Indie Music Streaming Platform built with love, React, and real music APIs.</b>
+</p>
 
 ---
 
-## Key Features
 
-- Full-length indie music streaming via Jamendo API
-- Spotify-based “Vibe Zone” (30 sec previews)
-- Search (songs, artists, albums)
-- Firebase Authentication (Email + Google)
-- Favorites with Firestore syncing
-- Glassmorphism UI + animations (Framer Motion)
-- Full responsiveness (Mobile, Tablet, Desktop)
-- Password reset via EmailJS
-- Mini floating audio player
+### 🔧 **Tech Stack**
 
----
+<p>
+  <a href="https://react.dev/"><img src="https://img.shields.io/badge/React-0A7EA4?logo=react&logoColor=white"></a>
+  <a href="https://vitejs.dev/"><img src="https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white"></a>
+  <a href="https://tailwindcss.com/"><img src="https://img.shields.io/badge/TailwindCSS-38BDF8?logo=tailwindcss&logoColor=white"></a>
+  <a href="https://firebase.google.com/"><img src="https://img.shields.io/badge/Firebase-FFCA28?logo=firebase&logoColor=black"></a>
+  <a href="https://vercel.com/"><img src="https://img.shields.io/badge/Vercel-000000?logo=vercel&logoColor=white"></a>
+  <a href="https://developer.spotify.com/"><img src="https://img.shields.io/badge/Spotify%20API-1DB954?logo=spotify&logoColor=white"></a>
+  <a href="https://developer.jamendo.com/v3.0"><img src="https://img.shields.io/badge/Jamendo%20API-AA0066?logo=jamendo&logoColor=white"></a>
+</p>
 
-## Tech Stack
+### ❄️ **Winter of Code Social 2025**
 
-| Layer           | Technologies                                     |
-| --------------- | ------------------------------------------------ |
-| Frontend        | React, Vite, Tailwind CSS, Framer Motion         |
-| Backend / Cloud | Firebase, Vercel Serverless Functions            |
-| APIs            | Jamendo API, Spotify Web API, Google YouTube API |
-| Misc            | EmailJS, Lucide Icons                            |
+<p>
+  <a href="https://github.com/WinterofCode"><img src="https://img.shields.io/badge/🌨️%20Winter%20of%20Code%20Social-2025-blueviolet"></a>
+  <a href="https://discord.com/channels/1049667734025289729/1444724828379811942"><img src="https://img.shields.io/badge/Join%20Discord-5865F2?logo=discord&logoColor=white"></a>
+</p>
 
 ---
 
-## How to Contribute (WOC Social)
+## ✨ Key Features
 
-1. Fork the repository
-2. Clone locally
-3. Create a branch
+* 🎶 **Full-length indie music streaming (Jamendo API)**
+* 🎧 **Spotify-powered Vibe Zone** (30s curated previews)
+* 🔍 Smart search (songs, artists, albums)
+* 🔐 Firebase Email + Google Authentication
+* ❤️ Favorites synced to Firestore
+* 🌫️ Smooth glassmorphism UI + animations
+* 📱 Fully responsive modern layout
+* ✉️ Password reset via EmailJS
+* 🎵 Global mini audio player with seamless transitions
 
-```
+---
 
+## 🧰 Tech Stack Overview
+
+| Layer        | Technologies                              |
+| ------------ | ----------------------------------------- |
+| **Frontend** | React, Vite, Tailwind CSS, Framer Motion  |
+| **Backend**  | Firebase, Vercel Functions                |
+| **APIs**     | Jamendo API, Spotify Web API, YouTube API |
+| **Other**    | EmailJS, Lucide Icons                     |
+
+---
+
+## 🛠️ How to Contribute (WOC Social Flow)
+
+1. **Fork** → **Clone** → **Create Branch**
+2. Use:
+
+```sh
 git checkout -b feature/my-feature
-
 ```
 
-4. Work on your issue
-5. Submit a PR with labels:
-
-- `wocs`
-- `level 1`, `level 2`, or `level 3`
-
-6. Wait for review & merge
-
-**Labels must be applied _before merging_ to count towards leaderboard points.**
+3. Work on your assigned issue
+4. Submit a PR following templates
+5. Wait for review & merge
 
 ---
 
-## PR Scoring (Official WOC Levels)
-
-| Label     | Difficulty   | Points |
-| --------- | ------------ | ------ |
-| `level 1` | Beginner     | 2      |
-| `level 2` | Intermediate | 5      |
-| `level 3` | Advanced     | 11     |
-
----
-
-## Quick Setup (Local Development)
+## ⚙️ Local Development Setup
 
 ```sh
 git clone https://github.com/mr-baraiya/VMusic.git
@@ -89,22 +92,25 @@ cp .env.example .env
 npm run dev
 ```
 
-Update `.env` with:
+### 🔑 Configure `.env` with:
 
-- Jamendo Client ID
-- Spotify Credentials
-- Firebase Config
-- EmailJS Details
+* Jamendo Client ID
+* Spotify App Credentials
+* Firebase Config
+* EmailJS Keys
 
 ---
 
-## Project Structure
+## 📁 Project Structure
 
 ```
 VMusic/
 ├── src/
 ├── api/
 ├── docs/
+│   ├── screenshots/
+│   ├── hero.png
+│   ├── ENVIRONMENT_VARIABLES.md
 ├── .env.example
 ├── README.md
 └── CONTRIBUTING.md
@@ -112,26 +118,27 @@ VMusic/
 
 ---
 
-## Documentation
+## 📘 Documentation References
 
-| File                          | Purpose                   |
-| ----------------------------- | ------------------------- |
-| CONTRIBUTING.md               | Full contribution process |
-| ROADMAP.md                    | Future development plans  |
-| VERCEL_SETUP.md               | Deployment guide          |
-| docs/ENVIRONMENT_VARIABLES.md | Complete .env reference   |
+| File                            | Purpose                 |
+| ------------------------------- | ----------------------- |
+| `CONTRIBUTING.md`               | Contribution guidelines |
+| `ROADMAP.md`                    | Upcoming features       |
+| `VERCEL_SETUP.md`               | Deployment instructions |
+| `docs/ENVIRONMENT_VARIABLES.md` | Full .env reference     |
 
 ---
 
 ## ❤️ Credits
 
 Built with passion by **Vishal Baraiya**
-Powered by Jamendo, Spotify, React, Firebase & Vercel.
+Powered by **Jamendo, Spotify, Firebase, React & Vercel**
 
 ---
 
-## Contact
+## 📩 Contact
 
-📩 Open an issue for support
+Open an issue for support or queries.
+🎵 *Happy Contributing & Keep the Indie Beat Alive!*
 
-🎵 _Happy Contributing & Keep the Indie Beat Alive!_
+---

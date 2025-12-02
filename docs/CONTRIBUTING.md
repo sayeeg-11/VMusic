@@ -1,173 +1,213 @@
-# Contribution Guidelines – VMusic
 
-Thank you for contributing to **VMusic – Indie Music Streaming Web App**, a project participating in **Winter of Code Social 2025**.  
-Please follow this guide carefully to ensure your contributions are properly tracked and scored.
+# 🚀 **Contribution Guidelines – VMusic**
+
+Thank you for contributing to **VMusic – Indie Music Streaming Web App**, a project participating in **Winter of Code Social 2025**.
+Please follow these guidelines to ensure your contributions are counted and the workflow stays organized.
 
 ---
 
-## Contribution Process
+# 🌟 **How to Contribute (Strict Workflow)**
 
-1. **Fork** this repository.
-2. **Clone** your fork locally.
+## **1️⃣ Create an Issue FIRST**
+
+Before making any changes, contributors **must create an issue** describing:
+
+* What feature/bug they want to work on
+* Why it is needed
+* Expected behaviour
+
+👉 **PRs without a linked issue will not be accepted.**
+
+---
+
+## **2️⃣ Wait Until the Issue Is Assigned**
+
+Contributors **must not** start working until:
+
+✔ A mentor/admin assigns the issue
+✔ They receive approval to proceed
+
+This prevents duplicate work and ensures correct tracking for WOC.
+
+---
+
+## **3️⃣ Fork & Clone the Repository**
 
 ```sh
-  git clone https://github.com/mr-baraiya/VMusic.git
+git clone https://github.com/mr-baraiya/VMusic.git
 ```
-
-3. Create a new branch:
-
-   ```sh
-   git checkout -b feature/my-feature
-   ```
-
-4. Make changes and test locally.
-5. Stage and commit:
-
-   ```sh
-   git add .
-   git commit -m "feat: added new feature"
-   ```
-
-6. Push the branch:
-
-   ```sh
-   git push origin feature/my-feature
-   ```
-
-7. Open a **Pull Request** (PR).
-8. **IMPORTANT → Apply required labels before merge**.
 
 ---
 
-## Required Labels (For WOC Scoring)
+## **4️⃣ Create a New Working Branch**
 
-| Label     | Meaning                        | Points |
-| --------- | ------------------------------ | ------ |
-| `wocs`    | Required for every PR          | –      |
-| `level 1` | Beginner-level contribution    | 2      |
-| `level 2` | Intermediate contribution      | 5      |
-| `level 3` | Advanced or major contribution | 11     |
-
-Labels **must be lowercase with correct spacing**, e.g.:
-
-```
-wocs
-level 1
-level 2
-level 3
+```sh
+git checkout -b feature/my-feature
 ```
 
-Incorrect examples:
+Branch name format:
 
 ```
-Level1, LEVEL 1, level1, level  2  (double space)
-```
-
-**Labels must be added BEFORE merging.** PRs merged without correct labels will not count in leaderboard scoring.
-
----
-
-## Branch Naming Convention
-
-```
-feature/add-music-player
-fix/authentication-issue
+feature/add-player-ui
+fix/login-validation
 docs/update-readme
+refactor/api-calls
 ```
 
 ---
 
-## Code Style Guidelines
+## **5️⃣ Implement the Solution**
 
-- Use **React functional components** with hooks.
-- Follow **Tailwind CSS utility-first styling**.
-- Ensure code is clean, readable, and properly commented.
-- Keep component structure modular.
-- Secure credentials using environment variables.
+* Write clean, modular code
+* Follow component and folder structure
+* Keep commit messages meaningful
 
-### Run checks before submitting:
+---
+
+## **6️⃣ Commit & Push**
 
 ```sh
-npm run dev         # Test locally
-npm run lint        # ESLint check
-npm run format      # Format code with Prettier
+git add .
+git commit -m "feat: add new player UI"
+git push origin feature/my-feature
 ```
 
 ---
 
-## Code Formatting
+## **7️⃣ Open a Pull Request**
 
-This project uses **Prettier** to maintain consistent code formatting across all files.
+Your PR should include:
 
-### Before submitting your PR:
+✔ A clear description
+✔ Screenshots if it's a UI change
+✔ The issue link:
 
-Run the formatting script to ensure your code follows the project's style guidelines:
+```
+Closes #<issue-number>
+```
+
+⚠ **Do NOT add labels. Labels will be added ONLY by mentors/admins.**
+
+---
+
+# 🏷️ **Labeling Policy (Important)**
+
+Winter of Code Social scoring depends on labels, but:
+
+### **Contributors MUST NOT add labels.**
+
+Only **Admins/Mentors** will assign:
+
+* `wocs`
+* `level 1`
+* `level 2`
+* `level 3`
+
+This ensures fairness and consistent scoring.
+
+---
+
+# 🎨 **Code Style Guidelines**
+
+## ✔ React
+
+* Use functional components
+* Prefer hooks
+* Keep components small & reusable
+
+## ✔ Tailwind CSS
+
+* Use utility classes
+* Maintain consistency
+
+## ✔ Code Quality
+
+* Meaningful names
+* Avoid unnecessary complexity
+
+---
+
+# 🧹 **Formatting Rules (Prettier)**
+
+Run formatting before submitting:
 
 ```sh
 npm run format
 ```
 
-This will automatically format all files in the project according to the rules defined in `.prettierrc`.
+### Prettier Rules (Already Configured)
 
-**Formatting Configuration:**
+* Semi-colons: yes
+* Single quotes: yes
+* Print width: 100
+* Trailing commas: ES5
 
-- Semi-colons: Yes
-- Single quotes: Yes
-- Print width: 100 characters
-- Tab width: 2 spaces
-- Trailing commas: ES5 standard
-
-**Note:** Prettier is configured to ignore `node_modules/`, `build/`, and `dist/` directories automatically.
-
----
-
-## Testing Suggestions
-
-Before submitting your PR:
-
-✔ Confirm UI does not break responsiveness
-
-✔ Verify playback and API integration
-
-✔ Ensure no warnings/errors in console
-
----
-
-## Review & Merge Policy
-
-| Stage             | Description             |
-| ----------------- | ----------------------- |
-| Initial Review    | Mentor/Admin reviews PR |
-| Level Assigned    | Correct level tag added |
-| Changes Required  | Contributor updates PR  |
-| Approved & Merged | Points awarded          |
-
----
-
-## Communication Channels
-
-- Project discussion on **Discord forum** (link coming soon).
-- For help, tag mentors or the project admin.
-- Use GitHub **Issues** and **PR comments** for technical queries.
-
----
-
-## Good First Issues
-
-New contributors should look for issues labeled:
+Ignored folders:
 
 ```
-wocs + level 1 + good first issue
+node_modules/
+build/
+dist/
 ```
-
-These are beginner-friendly and help you get started easily!
 
 ---
 
-## Thank You for Contributing
+# ✔ Pre-PR Checklist
 
-Your work improves the music experience for indie lovers worldwide!
-Each contribution, no matter how small, brings us closer to the next great feature.
+Before sending a PR:
 
-🎵 _Feel the Indie Beat. Free. Forever._
+* [ ] UI works on mobile & desktop
+* [ ] No console errors
+* [ ] Code is formatted with Prettier
+* [ ] ESLint passes: `npm run lint`
+* [ ] The PR is linked to an issue
+* [ ] No labels were manually added
+
+---
+
+# 🔄 **Review & Merge Process**
+
+1. Issue created by contributor
+2. Admin assigns the issue
+3. Contributor works on it
+4. Contributor opens PR
+5. Admin reviews
+6. Admin assigns correct labels
+7. PR approved & merged
+8. Contributor gets WOC points
+
+---
+
+# 🗨️ **Communication**
+
+* Use GitHub Issues for technical doubts
+* PR comments for code-related discussions
+* Discord community for general guidance (link coming soon)
+
+---
+
+# ⭐ **Good First Issues**
+
+Beginners can search for:
+
+```
+good first issue
+```
+
+Admins will additionally attach:
+
+```
+wocs + level 1
+```
+
+---
+
+# ❤️ **Thank You for Contributing**
+
+Your work helps build a smoother and more powerful streaming experience for indie music lovers!
+
+🎵 *Feel the Indie Beat. Free. Forever.*
 — **Team VMusic**
+
+---
+
